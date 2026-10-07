@@ -1,0 +1,301 @@
+{
+  "A": {
+    "problem_evidence": {
+      "type": "choice",
+      "instructions": "How does the founder know this problem is real?",
+      "criteria": {
+        "lived": "suffered it themselves",
+        "observed": "watched named people suffer it",
+        "researched": "cites reports only",
+        "asserted": "states it with no source",
+        "unclear": "cannot tell"
+      }
+    },
+    "problem_specificity": {
+      "type": "choice",
+      "instructions": "How specifically is the problem described?",
+      "criteria": {
+        "specific": "names exact pain points and who has them",
+        "vague": "broad statements about a general issue",
+        "unclear": "cannot tell"
+      }
+    },
+    "validation_effort": {
+      "type": "score",
+      "instructions": "How far has the founder gone to test this idea?",
+      "criteria": ["none", "asked_a_few", "asked_many", "tested_with_users"]
+    },
+    "founder_proximity": {
+      "type": "choice",
+      "instructions": "How close is the founder to the problem space?",
+      "criteria": {
+        "deep": "years of experience in the exact field",
+        "some": "related experience",
+        "none": "no prior connection",
+        "unclear": "cannot tell"
+      }
+    },
+    "motivation": {
+      "type": "choice",
+      "instructions": "Why is the founder solving this?",
+      "criteria": {
+        "personal": "deeply personal connection",
+        "opportunity": "sees a market gap",
+        "unclear": "cannot tell"
+      }
+    },
+    "constraint_type": {
+      "type": "choice",
+      "instructions": "What is the primary constraint mentioned?",
+      "criteria": {
+        "money": "needs funding",
+        "skills": "needs technical or business skills",
+        "network": "needs connections or market access",
+        "unclear": "cannot tell"
+      }
+    },
+    "alternatives": {
+      "type": "choice",
+      "instructions": "What do customers do today?",
+      "criteria": {
+        "workaround": "use a hacked together solution",
+        "competitor": "use a direct competitor",
+        "nothing": "do nothing",
+        "unclear": "cannot tell"
+      }
+    },
+    "willingness_to_pay": {
+      "type": "choice",
+      "instructions": "Is there evidence people will pay?",
+      "criteria": {
+        "strong": "people have paid or committed",
+        "weak": "people say they would pay",
+        "none": "no evidence",
+        "unclear": "cannot tell"
+      }
+    },
+    "route_to_market": {
+      "type": "choice",
+      "instructions": "How will they reach customers?",
+      "criteria": {
+        "clear": "specific channel identified",
+        "vague": "general ideas like 'social media'",
+        "unclear": "cannot tell"
+      }
+    },
+    "submission_real": {
+      "type": "choice",
+      "instructions": "Is this a genuine application or spam?",
+      "criteria": {
+        "genuine": "coherent responses",
+        "spam": "gibberish, test data, or marketing spam"
+      }
+    }
+  },
+  "B": {
+    "build_evidence": {
+      "type": "choice",
+      "instructions": "What is the state of the product?",
+      "criteria": {
+        "live": "built and usable",
+        "prototype": "partially built or mockup",
+        "unclear": "cannot tell"
+      }
+    },
+    "usage": {
+      "type": "choice",
+      "instructions": "Are people using the product?",
+      "criteria": {
+        "active": "regular active users",
+        "tried": "some people tried it",
+        "none": "no users yet",
+        "unclear": "cannot tell"
+      }
+    },
+    "validation_effort": {
+      "type": "score",
+      "instructions": "How far has the founder gone to test this?",
+      "criteria": ["none", "asked_a_few", "asked_many", "tested_with_users"]
+    },
+    "addresses_problem": {
+      "type": "choice",
+      "instructions": "Does the solution address the stated problem?",
+      "criteria": {
+        "direct": "directly solves it",
+        "indirect": "partially solves it",
+        "unclear": "cannot tell"
+      }
+    },
+    "founder_experience": {
+      "type": "choice",
+      "instructions": "What is the founder's experience?",
+      "criteria": {
+        "deep": "years of experience in the exact field",
+        "some": "related experience",
+        "none": "no prior connection",
+        "unclear": "cannot tell"
+      }
+    },
+    "motivation": {
+      "type": "choice",
+      "instructions": "Why is the founder solving this?",
+      "criteria": {
+        "personal": "deeply personal connection",
+        "opportunity": "sees a market gap",
+        "unclear": "cannot tell"
+      }
+    },
+    "constraint_type": {
+      "type": "choice",
+      "instructions": "What is the primary constraint mentioned?",
+      "criteria": {
+        "money": "needs funding",
+        "skills": "needs technical or business skills",
+        "network": "needs connections or market access",
+        "unclear": "cannot tell"
+      }
+    },
+    "alternatives": {
+      "type": "choice",
+      "instructions": "What do customers do today?",
+      "criteria": {
+        "workaround": "use a hacked together solution",
+        "competitor": "use a direct competitor",
+        "nothing": "do nothing",
+        "unclear": "cannot tell"
+      }
+    },
+    "willingness_to_pay": {
+      "type": "choice",
+      "instructions": "Is there evidence people will pay?",
+      "criteria": {
+        "strong": "people have paid or committed",
+        "weak": "people say they would pay",
+        "none": "no evidence",
+        "unclear": "cannot tell"
+      }
+    },
+    "route_to_market": {
+      "type": "choice",
+      "instructions": "How will they reach customers?",
+      "criteria": {
+        "clear": "specific channel identified",
+        "vague": "general ideas like 'social media'",
+        "unclear": "cannot tell"
+      }
+    },
+    "submission_real": {
+      "type": "choice",
+      "instructions": "Is this a genuine application or spam?",
+      "criteria": {
+        "genuine": "coherent responses",
+        "spam": "gibberish, test data, or marketing spam"
+      }
+    }
+  },
+  "C": {
+    "users": {
+      "type": "choice",
+      "instructions": "How many users?",
+      "criteria": {
+        "many": "significant user base",
+        "some": "handful of users",
+        "none": "no users",
+        "unclear": "cannot tell"
+      }
+    },
+    "retention": {
+      "type": "choice",
+      "instructions": "Do users stick around?",
+      "criteria": {
+        "high": "strong retention",
+        "low": "high churn",
+        "unclear": "cannot tell"
+      }
+    },
+    "founder_experience": {
+      "type": "choice",
+      "instructions": "What is the founder's experience?",
+      "criteria": {
+        "deep": "years of experience in the exact field",
+        "some": "related experience",
+        "none": "no prior connection",
+        "unclear": "cannot tell"
+      }
+    },
+    "motivation": {
+      "type": "choice",
+      "instructions": "Why is the founder solving this?",
+      "criteria": {
+        "personal": "deeply personal connection",
+        "opportunity": "sees a market gap",
+        "unclear": "cannot tell"
+      }
+    },
+    "constraint_type": {
+      "type": "choice",
+      "instructions": "What is the primary constraint mentioned?",
+      "criteria": {
+        "money": "needs funding",
+        "skills": "needs technical or business skills",
+        "network": "needs connections or market access",
+        "unclear": "cannot tell"
+      }
+    },
+    "paying": {
+      "type": "choice",
+      "instructions": "Are customers paying?",
+      "criteria": {
+        "yes": "paying customers",
+        "no": "free users only",
+        "unclear": "cannot tell"
+      }
+    },
+    "revenue": {
+      "type": "choice",
+      "instructions": "Is there meaningful revenue?",
+      "criteria": {
+        "high": "strong revenue",
+        "low": "little revenue",
+        "none": "no revenue",
+        "unclear": "cannot tell"
+      }
+    },
+    "alternatives": {
+      "type": "choice",
+      "instructions": "What do customers do today?",
+      "criteria": {
+        "workaround": "use a hacked together solution",
+        "competitor": "use a direct competitor",
+        "nothing": "do nothing",
+        "unclear": "cannot tell"
+      }
+    },
+    "route_to_market": {
+      "type": "choice",
+      "instructions": "How do they reach customers?",
+      "criteria": {
+        "clear": "specific channel identified",
+        "vague": "general ideas like 'social media'",
+        "unclear": "cannot tell"
+      }
+    },
+    "formalisation": {
+      "type": "choice",
+      "instructions": "Is the business formalised?",
+      "criteria": {
+        "yes": "registered entity",
+        "no": "informal",
+        "unclear": "cannot tell"
+      }
+    },
+    "submission_real": {
+      "type": "choice",
+      "instructions": "Is this a genuine application or spam?",
+      "criteria": {
+        "genuine": "coherent responses",
+        "spam": "gibberish, test data, or marketing spam"
+      }
+    }
+  }
+}

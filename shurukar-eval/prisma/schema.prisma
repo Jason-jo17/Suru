@@ -1,0 +1,79 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Candidate {
+  id          String   @id @default(cuid())
+  externalId  String   @unique          // row id from the intake export
+  district    String
+  block       String
+  persona     String                    // the six-option answer
+  declaredStage String                  // idea | built | in_market, as they said
+  language    String   @default("unknown")
+  consentAt   DateTime?
+  createdAt   DateTime @default(now())
+  responses   RawResponse[]
+  dossiers    Dossier[]
+  assessments Assessment[]
+}
+
+model RawResponse {
+  id          String   @id @default(cuid())
+  candidateId String
+  fieldId     String                    // stable id, NOT the column header
+  value       String
+  candidate   Candidate @relation(fields: [candidateId], references: [id])
+  @@index([candidateId])
+}
+
+model Dossier {
+  id          String   @id @default(cuid())
+  candidateId String
+  version     Int
+  payload     String                    // exactly what is sent as Laya's state (JSON)
+  tokenCount  Int
+  distillerVersion String
+  createdAt   DateTime @default(now())
+  candidate   Candidate @relation(fields: [candidateId], references: [id])
+  layaRuns    LayaRun[]
+  @@unique([candidateId, version])
+}
+
+model LayaRun {
+  id            String   @id @default(cuid())
+  dossierId     String
+  scenario      String                  // A | B | C
+  questionSetVersion String
+  modelCheckpoint    String
+  questionsSent String                  // JSON
+  answers       String                  // JSON { key: { value, probabilities, confidence } }
+  status        String                  // scored | unscored
+  error         String?
+  latencyMs     Int?
+  createdAt     DateTime @default(now())
+  dossier       Dossier @relation(fields: [dossierId], references: [id])
+}
+
+model Assessment {
+  id             String   @id @default(cuid())
+  candidateId    String
+  layaRunId      String?
+  founderProblem Int?                   // 0-100, null when unscored
+  problemSolution Int?
+  solutionMarket Int?
+  band           String                 // strong | promising | early | unscored
+  cappedBy       String?                // which floor fired, if any
+  flags          String                 // JSON string[]
+  confidence     Float?
+  reviewerDecision String?              // advance | hold | needs_info | null
+  reviewerNote   String?
+  reviewedBy     String?
+  reviewedAt     DateTime?
+  createdAt      DateTime @default(now())
+  candidate      Candidate @relation(fields: [candidateId], references: [id])
+}

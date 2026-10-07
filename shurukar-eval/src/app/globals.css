@@ -1,0 +1,89 @@
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  --bg-primary: #090D16;
+  --bg-secondary: #0F172A;
+  --bg-tertiary: #1E293B;
+  --bg-surface: #111827;
+  --bg-hover: #1E293B;
+  
+  --border-subtle: #1E293B;
+  --border-strong: #334155;
+  --border-accent: #38BDF8;
+
+  --text-main: #F8FAFC;
+  --text-muted: #94A3B8;
+  --text-dim: #64748B;
+
+  --band-strong: #10B981;
+  --band-promising: #38BDF8;
+  --band-early: #F59E0B;
+  --band-unscored: #64748B;
+  --flag-alert: #F43F5E;
+}
+
+body {
+  color: var(--text-main);
+  background-color: var(--bg-primary);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Monospace fonts for tokens, IDs, and numbers */
+.font-mono {
+  font-family: var(--font-mono);
+}
+
+/* Custom scrollbars for spreadsheet feel */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #090D16;
+}
+::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #475569;
+}
+
+/* Keyboard keycap styling */
+kbd {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 0.15rem 0.4rem;
+  border-radius: 0.25rem;
+  background-color: #1E293B;
+  color: #94A3B8;
+  border: 1px solid #334155;
+  box-shadow: 0 1px 0 #0F172A;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+/* Spreadsheet grid table utility */
+.sheet-grid {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+.sheet-cell {
+  border-right: 1px solid #1E293B;
+  border-bottom: 1px solid #1E293B;
+}
+.sheet-cell:first-child {
+  border-left: 1px solid #1E293B;
+}

@@ -1,0 +1,89 @@
+[
+  {
+    "name": "Arjun Kumar",
+    "district": "Patna",
+    "block": "Patna Sadar",
+    "persona": "student",
+    "declared_stage": "idea",
+    "problem_solution": "Students struggle to find affordable rooms. I want to build an app for this.",
+    "inspiration": "I faced this issue myself when moving to Patna.",
+    "constraint": "money",
+    "aspiration": "Build a big company",
+    "registration_status": "unregistered",
+    "language": "english",
+    "_expected": {
+      "band": "early",
+      "answers": {
+        "submission_real": "genuine",
+        "problem_evidence": "lived",
+        "validation_effort": 0,
+        "constraint_type": "money"
+      }
+    }
+  },
+  {
+    "name": "Spam User",
+    "district": "Fake",
+    "block": "Fake",
+    "persona": "other",
+    "declared_stage": "idea",
+    "problem_solution": "asdflkj qweoiur asdf lkj",
+    "inspiration": "buy crypto fast https://example.com",
+    "constraint": "money",
+    "aspiration": "make millions",
+    "registration_status": "unregistered",
+    "language": "english",
+    "_expected": {
+      "band": "unscored",
+      "answers": {
+        "submission_real": "spam"
+      }
+    }
+  },
+  {
+    "name": "Incomplete User",
+    "district": "Gaya",
+    "block": "Bodh Gaya",
+    "persona": "farmer",
+    "declared_stage": "idea",
+    "problem_solution": "",
+    "inspiration": "",
+    "constraint": "skills",
+    "aspiration": "Learn more",
+    "registration_status": "unregistered",
+    "language": "english",
+    "_expected": {
+      "band": "unscored",
+      "answers": {}
+    }
+  },
+  {
+    "name": "Ramesh Kumar (Hindi)",
+    "district": "Bhagalpur",
+    "block": "Kahalgaon",
+    "persona": "micro_entrepreneur",
+    "declared_stage": "in_market",
+    "problem_solution": "Dukaan mein saman ki list manage karna mushkil hai. Maine ek app banaya hai jo inventory track karta hai.",
+    "inspiration": "Main 5 saal se kirana dukan chala raha hu.",
+    "users_count": "50 dukandar",
+    "paying_customers": "10 dukandar",
+    "monthly_income": "Rs 5000",
+    "retention_signal": "Roz use karte hain",
+    "willingness_to_pay": "Log pay kar rahe hain Rs 500/month",
+    "route_to_market": "Main khud jake dukandaron se milta hu",
+    "alternatives_today": "Kagaz aur pen",
+    "constraint": "network",
+    "aspiration": "Har gaon me app pahunchana",
+    "registration_status": "registered",
+    "language": "hindi",
+    "_expected": {
+      "band": "strong",
+      "answers": {
+        "submission_real": "genuine",
+        "users": "some",
+        "paying": "yes",
+        "constraint_type": "network"
+      }
+    }
+  }
+]
