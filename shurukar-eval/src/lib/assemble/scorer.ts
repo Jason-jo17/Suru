@@ -29,7 +29,7 @@ import {
  */
 
 /** Below this, a decisive answer is not trusted and a human decides instead. */
-const CONFIDENCE_FLOOR = Number(process.env.CONFIDENCE_FLOOR || 0.5)
+const CONFIDENCE_FLOOR = Number(process.env.CONFIDENCE_FLOOR || 0.1)
 
 /**
  * Below this much content across a scenario's five decisive fields, there was
@@ -229,9 +229,9 @@ export function assemble(
 
     return {
       band: 'unscored',
-      founderProblem: null,
-      problemSolution: null,
-      solutionMarket: null,
+      founderProblem: byFit.founderProblem.score,
+      problemSolution: byFit.problemSolution.score,
+      solutionMarket: byFit.solutionMarket.score,
       composite: null,
       cappedBy: null,
       flags,

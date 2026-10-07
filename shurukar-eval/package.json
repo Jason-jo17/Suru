@@ -9,6 +9,8 @@
     "lint": "next lint",
     "ingest": "npx tsx scripts/ingest.ts",
     "score": "npx tsx scripts/runPipeline.ts",
+    "score:remaining": "npx tsx scripts/scoreRemaining.ts",
+    "rescore": "npx tsx scripts/rescoreExisting.ts",
     "acceptance": "npx tsx scripts/acceptance.ts",
     "stub:laya": "npx tsx test/stubLaya.ts",
     "db:push": "node scripts/setDbProvider.mjs && prisma db push",

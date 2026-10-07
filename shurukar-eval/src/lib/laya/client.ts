@@ -21,18 +21,18 @@ export const ENGLISH_CHECKPOINT = 'convaiinnovations/laya'
 export const MULTILINGUAL_CHECKPOINT = 'convaiinnovations/laya-multilingual'
 
 /** Max states the batch endpoint accepts in one call. */
-export const MAX_BATCH = 64
+export const MAX_BATCH = Number(process.env.LAYA_BATCH_SIZE || 1)
 
 function baseUrl(): string {
   return (process.env.LAYA_BASE_URL || DEFAULT_BASE_URL).replace(/\/+$/, '')
 }
 
 function timeoutMs(): number {
-  return Number(process.env.LAYA_TIMEOUT_MS || 90_000)
+  return Number(process.env.LAYA_TIMEOUT_MS || 180_000)
 }
 
 function maxAttempts(): number {
-  return Number(process.env.LAYA_MAX_ATTEMPTS || 4)
+  return Number(process.env.LAYA_MAX_ATTEMPTS || 3)
 }
 
 export interface LayaAnswer {
