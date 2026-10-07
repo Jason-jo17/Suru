@@ -1,39 +1,45 @@
-import { prisma } from '@/lib/db'
 import { NextResponse } from 'next/server'
+import { prisma } from '@/lib/db'
+import {
+  CANDIDATE_INCLUDE,
+  buildCandidateWhere,
+  buildOrderBy,
+  isAssessmentSort,
+  parseFilters,
+  sortRows,
+  toCsv,
+  type CandidateRow,
+} from '@/lib/query'
 
+/** Hard ceiling, so one export cannot pull the whole table into memory. */
+const MAX_ROWS = 20_000
+
+/**
+ * CSV of the current filtered set.
+ *
+ * It parses the same URL with the same `parseFilters` and builds the same
+ * `where` as the list screen, so the export and the view it was taken from can
+ * never disagree about which candidates are in scope.
+ */
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url)
-  const where: any = {}
+  const filters = parseFilters(Object.fromEntries(searchParams.entries()))
+  const where = buildCandidateWhere(filters)
 
-  if (searchParams.get('district')) where.district = searchParams.get('district')
-  if (searchParams.get('stage')) where.declaredStage = searchParams.get('stage')
-
-  const band = searchParams.get('band')
-  const unscored = searchParams.get('unscored')
-  
-  if (band || unscored === 'true') {
-    where.assessments = { some: {} }
-    if (band) where.assessments.some.band = band
-    if (unscored === 'true') where.assessments.some.band = 'unscored'
-  }
-
-  const candidates = await prisma.candidate.findMany({
+  const rows = (await prisma.candidate.findMany({
     where,
-    include: { assessments: { orderBy: { createdAt: 'desc' }, take: 1 } },
-    orderBy: { createdAt: 'desc' }
-  })
+    include: CANDIDATE_INCLUDE,
+    orderBy: buildOrderBy(filters.sort),
+    take: MAX_ROWS,
+  })) as CandidateRow[]
 
-  let csv = 'externalId,district,block,persona,stage,band\n'
-  for (const c of candidates) {
-    const asm = c.assessments[0]
-    const bandValue = asm?.band || 'unscored'
-    csv += `${c.externalId},${c.district},${c.block},${c.persona},${c.declaredStage},${bandValue}\n`
-  }
+  const ordered = isAssessmentSort(filters.sort) ? sortRows(rows, filters.sort) : rows
+  const stamp = new Date().toISOString().slice(0, 10)
 
-  return new NextResponse(csv, {
+  return new NextResponse(toCsv(ordered), {
     headers: {
-      'Content-Type': 'text/csv',
-      'Content-Disposition': 'attachment; filename="candidates.csv"'
-    }
+      'Content-Type': 'text/csv; charset=utf-8',
+      'Content-Disposition': `attachment; filename="shurukar-candidates-${stamp}.csv"`,
+    },
   })
 }

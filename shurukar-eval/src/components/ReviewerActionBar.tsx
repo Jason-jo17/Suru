@@ -1,127 +1,184 @@
 'use client'
 
-import { useState, useTransition, useEffect } from 'react'
-import { updateReviewerDecision } from '@/actions/reviewerAction'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import {
+  saveReviewerNote,
+  updateReviewerDecision,
+  type ReviewerDecision,
+} from '@/actions/reviewerAction'
 
-export default function ReviewerActionBar({ 
-  candidateId, 
-  currentDecision 
-}: { 
+interface Props {
   candidateId: string
-  currentDecision: string | null 
-}) {
-  const [decision, setDecision] = useState<string | null>(currentDecision)
-  const [isPending, startTransition] = useTransition()
-  const [toastMessage, setToastMessage] = useState<string | null>(null)
+  currentDecision: string | null
+  currentNote: string | null
+  reviewedBy: string | null
+  reviewedAt: string | null
+}
 
-  const handleAction = (newDecision: 'advance' | 'hold' | 'needs_info') => {
-    setDecision(newDecision)
-    setToastMessage(`Decision set to ${newDecision.toUpperCase()}`)
-    setTimeout(() => setToastMessage(null), 3000)
+const OPTIONS: Array<{ value: ReviewerDecision; label: string; key: string; tone: string }> = [
+  {
+    value: 'advance',
+    label: 'Advance',
+    key: 'a',
+    tone: 'border-emerald-500/50 text-emerald-300 hover:bg-emerald-500/10 data-[active=true]:bg-emerald-500/20',
+  },
+  {
+    value: 'hold',
+    label: 'Hold',
+    key: 'h',
+    tone: 'border-amber-500/50 text-amber-300 hover:bg-amber-500/10 data-[active=true]:bg-amber-500/20',
+  },
+  {
+    value: 'needs_info',
+    label: 'Needs info',
+    key: 'i',
+    tone: 'border-sky-500/50 text-sky-300 hover:bg-sky-500/10 data-[active=true]:bg-sky-500/20',
+  },
+]
 
-    startTransition(async () => {
-      const res = await updateReviewerDecision(candidateId, newDecision)
-      if (!res.success) {
-        setToastMessage(`Error: ${res.error}`)
+export default function ReviewerActionBar({
+  candidateId,
+  currentDecision,
+  currentNote,
+  reviewedBy,
+  reviewedAt,
+}: Props) {
+  const [decision, setDecision] = useState(currentDecision)
+  const [note, setNote] = useState(currentNote ?? '')
+  const [who, setWho] = useState(reviewedBy ?? '')
+  const [status, setStatus] = useState<string | null>(null)
+  const [pending, setPending] = useState(false)
+  const noteRef = useRef<HTMLTextAreaElement>(null)
+
+  const act = useCallback(
+    async (value: ReviewerDecision) => {
+      setPending(true)
+      setStatus(null)
+      const result = await updateReviewerDecision(candidateId, value, note, who)
+      setPending(false)
+      if (result.success) {
+        setDecision(value)
+        setStatus(`Recorded "${value.replace('_', ' ')}".`)
+      } else {
+        setStatus(result.error ?? 'Could not record the decision.')
       }
-    })
-  }
+    },
+    [candidateId, note, who],
+  )
 
-  // Keyboard shortcuts for reviewer decisions: A, H, I
+  const onlyNote = useCallback(async () => {
+    setPending(true)
+    setStatus(null)
+    const result = await saveReviewerNote(candidateId, note, who)
+    setPending(false)
+    setStatus(result.success ? 'Note saved.' : (result.error ?? 'Could not save the note.'))
+  }, [candidateId, note, who])
+
+  // A reviewer doing 200 of these will not use a mouse.
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      // Don't trigger if user is typing in an input
-      if (['INPUT', 'TEXTAREA', 'SELECT'].includes((e.target as HTMLElement).tagName)) {
+    const onKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement
+      if (['INPUT', 'TEXTAREA'].includes(target.tagName)) return
+      if (e.metaKey || e.ctrlKey || e.altKey) return
+
+      const key = e.key.toLowerCase()
+      if (key === 'n') {
+        e.preventDefault()
+        noteRef.current?.focus()
         return
       }
-
-      if (e.key === 'a' || e.key === 'A') {
+      const option = OPTIONS.find((o) => o.key === key)
+      if (option) {
         e.preventDefault()
-        handleAction('advance')
-      } else if (e.key === 'h' || e.key === 'H') {
-        e.preventDefault()
-        handleAction('hold')
-      } else if (e.key === 'i' || e.key === 'I' || e.key === 'n' || e.key === 'N') {
-        e.preventDefault()
-        handleAction('needs_info')
+        void act(option.value)
       }
     }
-
-    window.addEventListener('keydown', handleKeyDown)
-    return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [candidateId])
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [act])
 
   return (
-    <div className="sticky bottom-4 z-40 bg-[#0F172A]/95 backdrop-blur border border-[#1E293B] p-4 rounded-xl shadow-2xl flex flex-wrap items-center justify-between gap-4 font-mono">
-      <div className="flex items-center gap-3">
-        <div className="flex flex-col">
-          <span className="text-[10px] text-[#64748B] uppercase tracking-wider font-semibold">Reviewer Decision</span>
-          <div className="flex items-center gap-2 mt-0.5">
-            <span className={`w-2 h-2 rounded-full ${
-              decision === 'advance' ? 'bg-emerald-400 animate-pulse' :
-              decision === 'hold' ? 'bg-amber-400' :
-              decision === 'needs_info' ? 'bg-rose-400' :
-              'bg-[#64748B]'
-            }`} />
-            <span className="text-sm font-bold text-white capitalize">
-              {decision ? decision.replace('_', ' ') : 'Unreviewed'}
-            </span>
-            {isPending && <span className="text-[10px] text-sky-400 animate-spin">⟳</span>}
-          </div>
+    <div className="bg-[#0F172A] border border-[#1E293B] rounded-lg p-4 flex flex-col gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div>
+          <h3 className="text-sm font-semibold">Reviewer decision</h3>
+          <p className="text-[11px] text-[#64748B] mt-0.5">
+            This is the calibration set — thresholds are set by comparing these calls against the
+            model&apos;s bands.
+          </p>
         </div>
-
-        {toastMessage && (
-          <span className="text-xs px-2.5 py-1 bg-[#1E293B] text-sky-300 rounded border border-sky-500/20 animate-fade-in">
-            {toastMessage}
+        {decision && (
+          <span className="text-[11px] font-mono text-[#94A3B8]">
+            current: <span className="text-white">{decision.replace('_', ' ')}</span>
+            {reviewedAt ? ` · ${reviewedAt}` : ''}
+            {reviewedBy ? ` · ${reviewedBy}` : ''}
           </span>
         )}
       </div>
 
-      <div className="flex items-center gap-2">
-        {/* Advance Button */}
-        <button
-          type="button"
-          onClick={() => handleAction('advance')}
-          disabled={isPending}
-          className={`px-4 py-2 rounded-lg text-xs font-bold flex items-center gap-2 transition-all shadow-sm ${
-            decision === 'advance'
-              ? 'bg-emerald-500 text-[#090D16] ring-2 ring-emerald-400'
-              : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/20 active:scale-95'
-          }`}
-        >
-          <span>Advance</span>
-          <kbd className="bg-emerald-950/60 text-emerald-300 border-emerald-800">A</kbd>
-        </button>
+      <div className="flex flex-wrap gap-2">
+        {OPTIONS.map((o) => (
+          <button
+            key={o.value}
+            type="button"
+            disabled={pending}
+            data-active={decision === o.value}
+            onClick={() => void act(o.value)}
+            className={`px-3 py-1.5 rounded border text-xs font-semibold transition-colors disabled:opacity-50 ${o.tone}`}
+          >
+            {o.label} <kbd className="ml-1.5">{o.key.toUpperCase()}</kbd>
+          </button>
+        ))}
+      </div>
 
-        {/* Hold Button */}
-        <button
-          type="button"
-          onClick={() => handleAction('hold')}
-          disabled={isPending}
-          className={`px-4 py-2 rounded-lg text-xs font-bold flex items-center gap-2 transition-all shadow-sm ${
-            decision === 'hold'
-              ? 'bg-amber-500 text-[#090D16] ring-2 ring-amber-400'
-              : 'bg-amber-500/10 text-amber-400 border border-amber-500/30 hover:bg-amber-500/20 active:scale-95'
-          }`}
-        >
-          <span>Hold</span>
-          <kbd className="bg-amber-950/60 text-amber-300 border-amber-800">H</kbd>
-        </button>
+      <label className="flex flex-col gap-1.5">
+        <span className="text-[11px] text-[#94A3B8] font-mono">
+          Note <kbd>N</kbd> — why, in your words. Especially where you disagree with the band.
+        </span>
+        <textarea
+          ref={noteRef}
+          value={note}
+          onChange={(e) => setNote(e.target.value)}
+          rows={3}
+          placeholder="e.g. capped by problem_evidence, but the proximity answer makes the lived claim credible — advancing anyway."
+          className="w-full bg-[#090D16] border border-[#1E293B] rounded p-2.5 text-xs font-sans text-[#F8FAFC] placeholder:text-[#475569] focus:outline-none focus:border-sky-500/60 resize-y"
+        />
+      </label>
 
-        {/* Needs Info Button */}
+      <div className="flex flex-wrap items-center gap-2">
+        <input
+          value={who}
+          onChange={(e) => setWho(e.target.value)}
+          placeholder="your name"
+          className="bg-[#090D16] border border-[#1E293B] rounded px-2.5 py-1.5 text-xs font-mono text-[#F8FAFC] placeholder:text-[#475569] focus:outline-none focus:border-sky-500/60"
+        />
         <button
           type="button"
-          onClick={() => handleAction('needs_info')}
-          disabled={isPending}
-          className={`px-4 py-2 rounded-lg text-xs font-bold flex items-center gap-2 transition-all shadow-sm ${
-            decision === 'needs_info'
-              ? 'bg-rose-500 text-[#090D16] ring-2 ring-rose-400'
-              : 'bg-rose-500/10 text-rose-400 border border-rose-500/30 hover:bg-rose-500/20 active:scale-95'
-          }`}
+          disabled={pending}
+          onClick={() => void onlyNote()}
+          className="px-3 py-1.5 rounded border border-[#334155] text-xs text-[#94A3B8] hover:bg-[#1E293B] disabled:opacity-50"
         >
-          <span>Needs Info</span>
-          <kbd className="bg-rose-950/60 text-rose-300 border-rose-800">I</kbd>
+          Save note only
         </button>
+        {decision && (
+          <button
+            type="button"
+            disabled={pending}
+            onClick={async () => {
+              setPending(true)
+              const result = await updateReviewerDecision(candidateId, null, note, who)
+              setPending(false)
+              if (result.success) {
+                setDecision(null)
+                setStatus('Decision cleared.')
+              }
+            }}
+            className="px-3 py-1.5 rounded border border-[#334155] text-xs text-[#64748B] hover:bg-[#1E293B] disabled:opacity-50"
+          >
+            Clear decision
+          </button>
+        )}
+        {status && <span className="text-[11px] font-mono text-sky-300">{status}</span>}
       </div>
     </div>
   )

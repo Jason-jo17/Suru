@@ -1,191 +1,379 @@
 'use client'
 
 import { useRouter, useSearchParams } from 'next/navigation'
-import { useState, FormEvent, useEffect, useRef } from 'react'
+import { useEffect, useRef, useState, type FormEvent } from 'react'
+import {
+  BANDS,
+  FLAG_TYPES,
+  PERSONAS,
+  REGISTRATION_STATUSES,
+  REVIEWER_STATUSES,
+  SORTS,
+  STAGES,
+} from '@/lib/query'
 
-export default function Filters() {
+interface Props {
+  districts: string[]
+  blocks: string[]
+  languages: string[]
+  questionSetVersions: string[]
+  total: number
+}
+
+const selectClass =
+  'bg-[#090D16] border border-[#1E293B] rounded px-2 py-1.5 text-[11px] font-mono text-[#F8FAFC] focus:outline-none focus:border-sky-500/60'
+
+/**
+ * Every filter is reflected in the URL, so a filtered view is shareable and the
+ * CSV export of that view returns exactly the same rows.
+ */
+export default function Filters({ districts, blocks, languages, questionSetVersions, total }: Props) {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const searchInputRef = useRef<HTMLInputElement>(null)
-  
-  const [district, setDistrict] = useState(searchParams.get('district') || '')
-  const [stage, setStage] = useState(searchParams.get('stage') || '')
-  const [band, setBand] = useState(searchParams.get('band') || '')
-  const [reviewerStatus, setReviewerStatus] = useState(searchParams.get('reviewerStatus') || '')
-  const [unscored, setUnscored] = useState(searchParams.get('unscored') === 'true')
-  const [hasFlags, setHasFlags] = useState(searchParams.get('hasFlags') === 'true')
+  const searchRef = useRef<HTMLInputElement>(null)
+  const [showScores, setShowScores] = useState(
+    Boolean(
+      searchParams.get('fpMin') ||
+        searchParams.get('psMin') ||
+        searchParams.get('smMin') ||
+        searchParams.get('fpMax') ||
+        searchParams.get('psMax') ||
+        searchParams.get('smMax') ||
+        searchParams.get('confidenceMin'),
+    ),
+  )
 
-  // Global hotkey to focus search bar with '/'
+  const get = (key: string) => searchParams.get(key) ?? ''
+
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === '/' && document.activeElement !== searchInputRef.current) {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === '/' && document.activeElement !== searchRef.current) {
         e.preventDefault()
-        searchInputRef.current?.focus()
+        searchRef.current?.focus()
       }
     }
-    window.addEventListener('keydown', handleKeyDown)
-    return () => window.removeEventListener('keydown', handleKeyDown)
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
   }, [])
 
-  const applyFilters = (overrides: Record<string, any> = {}) => {
-    const params = new URLSearchParams()
-    
-    const d = overrides.district !== undefined ? overrides.district : district
-    const s = overrides.stage !== undefined ? overrides.stage : stage
-    const b = overrides.band !== undefined ? overrides.band : band
-    const rs = overrides.reviewerStatus !== undefined ? overrides.reviewerStatus : reviewerStatus
-    const u = overrides.unscored !== undefined ? overrides.unscored : unscored
-    const f = overrides.hasFlags !== undefined ? overrides.hasFlags : hasFlags
-
-    if (d) params.set('district', d)
-    if (s) params.set('stage', s)
-    if (b) params.set('band', b)
-    if (rs) params.set('reviewerStatus', rs)
-    if (u) params.set('unscored', 'true')
-    if (f) params.set('hasFlags', 'true')
-    
+  const push = (updates: Record<string, string | null>) => {
+    const params = new URLSearchParams(searchParams.toString())
+    for (const [key, value] of Object.entries(updates)) {
+      if (value === null || value === '' || value === 'false') params.delete(key)
+      else params.set(key, value)
+    }
+    params.delete('page') // a changed filter always returns to the first page
     router.push(`/candidates?${params.toString()}`)
   }
 
-  const handleSubmit = (e: FormEvent) => {
+  const onSubmit = (e: FormEvent) => {
     e.preventDefault()
-    applyFilters()
+    const form = e.target as HTMLFormElement
+    const data = new FormData(form)
+    const updates: Record<string, string | null> = {}
+    for (const key of [
+      'q',
+      'fpMin',
+      'fpMax',
+      'psMin',
+      'psMax',
+      'smMin',
+      'smMax',
+      'confidenceMin',
+    ]) {
+      updates[key] = (data.get(key) as string | null) ?? null
+    }
+    push(updates)
   }
 
-  const handleReset = () => {
-    setDistrict('')
-    setStage('')
-    setBand('')
-    setReviewerStatus('')
-    setUnscored(false)
-    setHasFlags(false)
-    router.push('/candidates')
-  }
+  const activeCount = [...searchParams.keys()].filter(
+    (k) => !['page', 'sort'].includes(k),
+  ).length
 
-  const activeFiltersCount = [
-    district, stage, band, reviewerStatus, unscored, hasFlags
-  ].filter(Boolean).length
+  const exportHref = `/api/export?${searchParams.toString()}`
 
   return (
-    <div className="mb-4 bg-[#0F172A] border border-[#1E293B] rounded-lg p-2.5 shadow-sm">
-      <form onSubmit={handleSubmit} className="flex flex-wrap items-center gap-2 text-xs">
-        {/* Search District / Block */}
-        <div className="relative flex-1 min-w-[200px]">
-          <div className="absolute inset-y-0 left-2.5 flex items-center pointer-events-none text-[#64748B]">
-            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-          </div>
-          <input 
-            ref={searchInputRef}
-            type="text" 
-            value={district} 
-            onChange={e => setDistrict(e.target.value)} 
-            placeholder="Search district, block... (Press '/' to focus)" 
-            className="w-full bg-[#111827] border border-[#1E293B] rounded pl-8 pr-12 py-1.5 text-xs text-white placeholder-[#64748B] focus:outline-none focus:border-sky-500 font-mono"
-          />
-          <div className="absolute inset-y-0 right-2 flex items-center">
-            <kbd>/</kbd>
-          </div>
-        </div>
+    <div className="mb-4 bg-[#0F172A] border border-[#1E293B] rounded-lg p-2.5 flex flex-col gap-2">
+      <form onSubmit={onSubmit} className="flex flex-wrap items-center gap-2">
+        <input
+          ref={searchRef}
+          name="q"
+          defaultValue={get('q')}
+          placeholder="search id, district or block   /"
+          className="flex-1 min-w-[200px] bg-[#090D16] border border-[#1E293B] rounded px-2.5 py-1.5 text-[11px] font-mono text-[#F8FAFC] placeholder:text-[#475569] focus:outline-none focus:border-sky-500/60"
+        />
 
-        {/* Stage Filter */}
-        <div className="flex items-center bg-[#111827] border border-[#1E293B] rounded px-2 py-1">
-          <span className="text-[#64748B] mr-1.5 font-medium">Stage:</span>
-          <select 
-            value={stage} 
-            onChange={e => { setStage(e.target.value); applyFilters({ stage: e.target.value }) }} 
-            className="bg-transparent text-white focus:outline-none cursor-pointer"
-          >
-            <option value="" className="bg-[#111827]">All</option>
-            <option value="idea" className="bg-[#111827]">Idea (A)</option>
-            <option value="built" className="bg-[#111827]">Built (B)</option>
-            <option value="in_market" className="bg-[#111827]">In Market (C)</option>
-          </select>
-        </div>
-
-        {/* Band Filter */}
-        <div className="flex items-center bg-[#111827] border border-[#1E293B] rounded px-2 py-1">
-          <span className="text-[#64748B] mr-1.5 font-medium">Band:</span>
-          <select 
-            value={band} 
-            onChange={e => { setBand(e.target.value); applyFilters({ band: e.target.value }) }} 
-            className="bg-transparent text-white focus:outline-none cursor-pointer"
-          >
-            <option value="" className="bg-[#111827]">All</option>
-            <option value="strong" className="bg-[#111827]">Strong</option>
-            <option value="promising" className="bg-[#111827]">Promising</option>
-            <option value="early" className="bg-[#111827]">Early</option>
-          </select>
-        </div>
-
-        {/* Reviewer Status */}
-        <div className="flex items-center bg-[#111827] border border-[#1E293B] rounded px-2 py-1">
-          <span className="text-[#64748B] mr-1.5 font-medium">Review:</span>
-          <select 
-            value={reviewerStatus} 
-            onChange={e => { setReviewerStatus(e.target.value); applyFilters({ reviewerStatus: e.target.value }) }} 
-            className="bg-transparent text-white focus:outline-none cursor-pointer"
-          >
-            <option value="" className="bg-[#111827]">All</option>
-            <option value="unreviewed" className="bg-[#111827]">Unreviewed</option>
-            <option value="advance" className="bg-[#111827]">Advance</option>
-            <option value="hold" className="bg-[#111827]">Hold</option>
-            <option value="needs_info" className="bg-[#111827]">Needs Info</option>
-          </select>
-        </div>
-
-        {/* Unscored Toggle Button */}
-        <button
-          type="button"
-          onClick={() => { const val = !unscored; setUnscored(val); applyFilters({ unscored: val }) }}
-          className={`px-2.5 py-1 rounded border flex items-center gap-1.5 transition-colors ${
-            unscored 
-              ? 'bg-sky-500/10 border-sky-500 text-sky-400 font-medium' 
-              : 'bg-[#111827] border-[#1E293B] text-[#94A3B8] hover:border-[#334155]'
-          }`}
+        <select
+          aria-label="District"
+          value={get('district')}
+          onChange={(e) => push({ district: e.target.value })}
+          className={selectClass}
         >
-          <span className={`w-1.5 h-1.5 rounded-full ${unscored ? 'bg-sky-400' : 'bg-[#64748B]'}`} />
-          Unscored Only
-        </button>
+          <option value="">district · all</option>
+          {districts.map((d) => (
+            <option key={d} value={d}>
+              {d}
+            </option>
+          ))}
+        </select>
 
-        {/* Flags Toggle Button */}
-        <button
-          type="button"
-          onClick={() => { const val = !hasFlags; setHasFlags(val); applyFilters({ hasFlags: val }) }}
-          className={`px-2.5 py-1 rounded border flex items-center gap-1.5 transition-colors ${
-            hasFlags 
-              ? 'bg-rose-500/10 border-rose-500 text-rose-400 font-medium' 
-              : 'bg-[#111827] border-[#1E293B] text-[#94A3B8] hover:border-[#334155]'
-          }`}
+        <select
+          aria-label="Block"
+          value={get('block')}
+          onChange={(e) => push({ block: e.target.value })}
+          className={selectClass}
         >
-          <span className={`w-1.5 h-1.5 rounded-full ${hasFlags ? 'bg-rose-400' : 'bg-[#64748B]'}`} />
-          Flags Only
-        </button>
+          <option value="">block · all</option>
+          {blocks.map((b) => (
+            <option key={b} value={b}>
+              {b}
+            </option>
+          ))}
+        </select>
 
-        {/* Clear Filters (if active) */}
-        {activeFiltersCount > 0 && (
-          <button
-            type="button"
-            onClick={handleReset}
-            className="px-2 py-1 text-[#64748B] hover:text-white transition-colors underline"
+        <select
+          aria-label="Stage"
+          value={get('stage')}
+          onChange={(e) => push({ stage: e.target.value })}
+          className={selectClass}
+        >
+          <option value="">stage · all</option>
+          {STAGES.map((s) => (
+            <option key={s.value} value={s.value}>
+              {s.label}
+            </option>
+          ))}
+        </select>
+
+        <select
+          aria-label="Persona"
+          value={get('persona')}
+          onChange={(e) => push({ persona: e.target.value })}
+          className={selectClass}
+        >
+          <option value="">persona · all</option>
+          {PERSONAS.map((p) => (
+            <option key={p.value} value={p.value}>
+              {p.label}
+            </option>
+          ))}
+        </select>
+
+        <select
+          aria-label="Band"
+          value={get('band')}
+          onChange={(e) => push({ band: e.target.value, unscored: null })}
+          className={selectClass}
+        >
+          <option value="">band · all</option>
+          {BANDS.map((b) => (
+            <option key={b} value={b}>
+              {b}
+            </option>
+          ))}
+        </select>
+
+        <select
+          aria-label="Reviewer status"
+          value={get('reviewerStatus')}
+          onChange={(e) => push({ reviewerStatus: e.target.value })}
+          className={selectClass}
+        >
+          <option value="">review · all</option>
+          {REVIEWER_STATUSES.map((r) => (
+            <option key={r.value} value={r.value}>
+              {r.label}
+            </option>
+          ))}
+        </select>
+
+        <select
+          aria-label="Flag type"
+          value={get('flagType')}
+          onChange={(e) => push({ flagType: e.target.value, hasFlags: null })}
+          className={selectClass}
+        >
+          <option value="">flag · any</option>
+          {FLAG_TYPES.map((f) => (
+            <option key={f.value} value={f.value}>
+              {f.label}
+            </option>
+          ))}
+        </select>
+
+        <select
+          aria-label="Language"
+          value={get('language')}
+          onChange={(e) => push({ language: e.target.value })}
+          className={selectClass}
+        >
+          <option value="">language · all</option>
+          {languages.map((l) => (
+            <option key={l} value={l}>
+              {l}
+            </option>
+          ))}
+        </select>
+
+        <select
+          aria-label="Registration status"
+          value={get('registrationStatus')}
+          onChange={(e) => push({ registrationStatus: e.target.value })}
+          className={selectClass}
+        >
+          <option value="">registration · all</option>
+          {REGISTRATION_STATUSES.map((r) => (
+            <option key={r.value} value={r.value}>
+              {r.label}
+            </option>
+          ))}
+        </select>
+
+        {questionSetVersions.length > 1 && (
+          <select
+            aria-label="Question set version"
+            title="Scores from different question-set versions are not comparable"
+            value={get('questionSetVersion')}
+            onChange={(e) => push({ questionSetVersion: e.target.value })}
+            className={selectClass}
           >
-            Reset ({activeFiltersCount})
-          </button>
+            <option value="">question set · all</option>
+            {questionSetVersions.map((v) => (
+              <option key={v} value={v}>
+                {v}
+              </option>
+            ))}
+          </select>
         )}
 
-        {/* Export CSV Button */}
-        <a 
-          href={`/api/export?${searchParams.toString()}`} 
-          className="ml-auto px-3 py-1 bg-emerald-600/10 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-600/20 transition-colors rounded font-medium flex items-center gap-1.5"
-          download
+        <select
+          aria-label="Sort"
+          value={get('sort') || 'date_desc'}
+          onChange={(e) => push({ sort: e.target.value })}
+          className={selectClass}
         >
-          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-          </svg>
-          Export CSV
-        </a>
+          {SORTS.map((s) => (
+            <option key={s.value} value={s.value}>
+              sort · {s.label}
+            </option>
+          ))}
+        </select>
+
+        <button type="submit" className="hidden" aria-hidden />
       </form>
+
+      <div className="flex flex-wrap items-center gap-2 text-[11px] font-mono">
+        <button
+          type="button"
+          onClick={() => push({ unscored: get('unscored') === 'true' ? null : 'true', band: null })}
+          data-active={get('unscored') === 'true'}
+          className="px-2 py-1 rounded border border-slate-500/50 text-slate-300 hover:bg-slate-500/10 data-[active=true]:bg-slate-500/25 data-[active=true]:text-white"
+        >
+          unscored only
+        </button>
+        <button
+          type="button"
+          onClick={() => push({ needsHuman: get('needsHuman') === 'true' ? null : 'true' })}
+          data-active={get('needsHuman') === 'true'}
+          className="px-2 py-1 rounded border border-sky-500/50 text-sky-300 hover:bg-sky-500/10 data-[active=true]:bg-sky-500/25"
+        >
+          needs a human
+        </button>
+        <button
+          type="button"
+          onClick={() => push({ hasFlags: get('hasFlags') === 'true' ? null : 'true', flagType: null })}
+          data-active={get('hasFlags') === 'true'}
+          className="px-2 py-1 rounded border border-amber-500/50 text-amber-300 hover:bg-amber-500/10 data-[active=true]:bg-amber-500/25"
+        >
+          has flags
+        </button>
+        <button
+          type="button"
+          onClick={() => setShowScores((v) => !v)}
+          className="px-2 py-1 rounded border border-[#334155] text-[#94A3B8] hover:bg-[#1E293B]"
+        >
+          {showScores ? 'hide' : 'show'} fit thresholds
+        </button>
+
+        <span className="ml-auto flex items-center gap-2">
+          <span className="text-[#64748B]">
+            {activeCount} filter{activeCount === 1 ? '' : 's'} · {total} rows
+          </span>
+          {activeCount > 0 && (
+            <button
+              type="button"
+              onClick={() => router.push('/candidates')}
+              className="px-2 py-1 rounded border border-[#334155] text-[#64748B] hover:bg-[#1E293B]"
+            >
+              reset
+            </button>
+          )}
+          <a
+            href={exportHref}
+            className="px-2 py-1 rounded border border-sky-500/50 text-sky-300 hover:bg-sky-500/10"
+          >
+            export this view ↓
+          </a>
+        </span>
+      </div>
+
+      {showScores && (
+        <form
+          onSubmit={onSubmit}
+          className="flex flex-wrap items-end gap-3 border-t border-[#1E293B] pt-2.5 text-[11px] font-mono"
+        >
+          {[
+            { prefix: 'fp', label: 'Founder–Problem' },
+            { prefix: 'ps', label: 'Problem–Solution' },
+            { prefix: 'sm', label: 'Solution–Market' },
+          ].map(({ prefix, label }) => (
+            <div key={prefix} className="flex flex-col gap-1">
+              <span className="text-[#64748B]">{label}</span>
+              <div className="flex items-center gap-1">
+                <input
+                  name={`${prefix}Min`}
+                  type="number"
+                  min={0}
+                  max={100}
+                  defaultValue={get(`${prefix}Min`)}
+                  placeholder="min"
+                  className="w-16 bg-[#090D16] border border-[#1E293B] rounded px-1.5 py-1 text-[#F8FAFC] placeholder:text-[#475569] focus:outline-none focus:border-sky-500/60"
+                />
+                <span className="text-[#475569]">–</span>
+                <input
+                  name={`${prefix}Max`}
+                  type="number"
+                  min={0}
+                  max={100}
+                  defaultValue={get(`${prefix}Max`)}
+                  placeholder="max"
+                  className="w-16 bg-[#090D16] border border-[#1E293B] rounded px-1.5 py-1 text-[#F8FAFC] placeholder:text-[#475569] focus:outline-none focus:border-sky-500/60"
+                />
+              </div>
+            </div>
+          ))}
+          <div className="flex flex-col gap-1">
+            <span className="text-[#64748B]">Confidence ≥</span>
+            <input
+              name="confidenceMin"
+              type="number"
+              step="0.05"
+              min={0}
+              max={1}
+              defaultValue={get('confidenceMin')}
+              placeholder="0.00"
+              className="w-20 bg-[#090D16] border border-[#1E293B] rounded px-1.5 py-1 text-[#F8FAFC] placeholder:text-[#475569] focus:outline-none focus:border-sky-500/60"
+            />
+          </div>
+          <input type="hidden" name="q" value={get('q')} />
+          <button
+            type="submit"
+            className="px-2.5 py-1.5 rounded border border-sky-500/50 text-sky-300 hover:bg-sky-500/10"
+          >
+            apply
+          </button>
+        </form>
+      )}
     </div>
   )
 }

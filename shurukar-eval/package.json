@@ -8,7 +8,11 @@
     "start": "next start",
     "lint": "next lint",
     "ingest": "npx tsx scripts/ingest.ts",
-    "score": "npx tsx scripts/runPipeline.ts"
+    "score": "npx tsx scripts/runPipeline.ts",
+    "acceptance": "npx tsx scripts/acceptance.ts",
+    "stub:laya": "npx tsx test/stubLaya.ts",
+    "db:push": "npx prisma db push",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@prisma/client": "^5.22.0",

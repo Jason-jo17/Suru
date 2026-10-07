@@ -1,89 +1,447 @@
 [
   {
+    "external_id": "idea-01",
+    "language": "english",
     "name": "Arjun Kumar",
     "district": "Patna",
     "block": "Patna Sadar",
     "persona": "student",
     "declared_stage": "idea",
-    "problem_solution": "Students struggle to find affordable rooms. I want to build an app for this.",
-    "inspiration": "I faced this issue myself when moving to Patna.",
+    "problem_solution": "Students moving to Patna for coaching cannot find a room they can afford. Landlords want a year's rent up front. I want to run a verified monthly-rent listing for student rooms.",
+    "who_will_use": "Students arriving for coaching classes, and the landlords near the coaching blocks.",
+    "founder_proximity": "I spent two years finding rooms for myself and then for friends arriving every June.",
+    "purpose": "I lost a term because I could not find a room and had to go home.",
+    "inspiration": "I kept doing this for free for juniors.",
+    "validation_done": "I listed 40 rooms on a WhatsApp group last season and matched 18 students.",
+    "customers_spoken_to": "about 60 students and 25 landlords",
+    "alternatives_today": "They walk street to street asking shopkeepers, or pay a broker one month rent.",
+    "willingness_to_pay": "Students paid me 200 rupees each for a verified list last year.",
+    "route_to_market": "The coaching centres already let me put up a notice.",
+    "access_route": "Coaching centre noticeboards and the landlord WhatsApp groups I run.",
     "constraint": "money",
-    "aspiration": "Build a big company",
+    "time_in_line": "2 years",
+    "aspiration": "A verified rental listing across every coaching district in Bihar",
+    "growth_ambition": "Patna first, then Kota-style coaching towns",
     "registration_status": "unregistered",
-    "language": "english",
+    "team_size": "2",
+    "time_commitment": "30 hours a week",
+    "commitment_type": "full time",
+    "prior_venture_closed": "no",
     "_expected": {
-      "band": "early",
+      "scenario": "A",
+      "checkpoint": "convaiinnovations/laya",
+      "band": "promising",
       "answers": {
         "submission_real": "genuine",
         "problem_evidence": "lived",
-        "validation_effort": 0,
-        "constraint_type": "money"
-      }
+        "founder_proximity": "deep"
+      },
+      "seed_bank_complete": true
     }
   },
   {
-    "name": "Spam User",
-    "district": "Fake",
-    "block": "Fake",
-    "persona": "other",
-    "declared_stage": "idea",
-    "problem_solution": "asdflkj qweoiur asdf lkj",
-    "inspiration": "buy crypto fast https://example.com",
-    "constraint": "money",
-    "aspiration": "make millions",
-    "registration_status": "unregistered",
+    "external_id": "idea-02",
     "language": "english",
+    "name": "Vikash Singh",
+    "district": "Nalanda",
+    "block": "Rajgir",
+    "persona": "student",
+    "declared_stage": "idea",
+    "problem_solution": "Everyone knows Indian farmers need an app. I will build an app for farmers.",
+    "who_will_use": "Farmers.",
+    "founder_proximity": "I have not worked in farming but I read about it.",
+    "purpose": "There is a big market in agritech.",
+    "validation_done": "Not yet.",
+    "alternatives_today": "I am not sure what they do now.",
+    "willingness_to_pay": "I think they will pay.",
+    "route_to_market": "Social media marketing.",
+    "constraint": "skills",
+    "aspiration": "Become a big agritech founder",
+    "registration_status": "unregistered",
+    "team_size": "1",
+    "time_commitment": "5 hours a week",
+    "commitment_type": "part time",
     "_expected": {
-      "band": "unscored",
+      "scenario": "A",
+      "band": "early",
+      "capped": true,
       "answers": {
-        "submission_real": "spam"
-      }
+        "submission_real": "genuine",
+        "problem_evidence": "asserted"
+      },
+      "seed_bank_complete": true
     }
   },
   {
-    "name": "Incomplete User",
+    "external_id": "abandoned-01",
+    "language": "hindi",
+    "name": "Sunil Paswan",
     "district": "Gaya",
     "block": "Bodh Gaya",
     "persona": "farmer",
     "declared_stage": "idea",
-    "problem_solution": "",
-    "inspiration": "",
-    "constraint": "skills",
-    "aspiration": "Learn more",
+    "aspiration": "Apne gaon mein doodh ka collection centre kholna",
+    "constraint": "money",
     "registration_status": "unregistered",
-    "language": "english",
     "_expected": {
+      "scenario": "A",
       "band": "unscored",
-      "answers": {}
+      "flags": [
+        "thin_dossier"
+      ],
+      "seed_bank_complete": true,
+      "seed_bank_fields": [
+        "aspiration",
+        "block",
+        "status",
+        "constraintType"
+      ],
+      "note": "Answered through the router and stopped. Must land unscored with a COMPLETE SEED Bank record."
     }
   },
   {
-    "name": "Ramesh Kumar (Hindi)",
+    "external_id": "spam-01",
+    "language": "english",
+    "name": "Asdf Qwerty",
+    "district": "Fake",
+    "block": "Fake",
+    "persona": "other",
+    "declared_stage": "idea",
+    "problem_solution": "asdflkj qweoiur asdf lkj zxcv 1234 test test test",
+    "who_will_use": "aaaa bbbb",
+    "founder_proximity": "n/a",
+    "purpose": "buy crypto fast https://example.com/ref=123 earn 10x daily",
+    "validation_done": "no",
+    "alternatives_today": "asdf",
+    "willingness_to_pay": "yes yes yes",
+    "route_to_market": "telegram",
+    "constraint": "money",
+    "aspiration": "make millions fast",
+    "registration_status": "unregistered",
+    "_expected": {
+      "scenario": "A",
+      "answers": {
+        "submission_real": "spam"
+      },
+      "flags": [
+        "suspected_spam"
+      ],
+      "not_band": "strong",
+      "seed_bank_complete": true,
+      "note": "Must come back submission_real != genuine. Flagged and capped, never auto-rejected."
+    }
+  },
+  {
+    "external_id": "built-01",
+    "language": "english",
+    "name": "Pooja Sharma",
+    "district": "Muzaffarpur",
+    "block": "Kanti",
+    "persona": "micro_entrepreneur",
+    "declared_stage": "built",
+    "problem_solution": "Litchi growers here have no way to find out the Delhi mandi rate before they sell to a local trader. I built a WhatsApp bot that sends the morning rate.",
+    "who_will_use": "Litchi and vegetable growers in Muzaffarpur who sell to traders.",
+    "founder_proximity": "My family has four acres of litchi and we have been selling to traders for years.",
+    "purpose": "We were underpaid for years because we did not know the rate.",
+    "validation_done": "Thirty growers in my block have been on the bot for one season.",
+    "customers_spoken_to": "about 45 growers",
+    "users_count": "30",
+    "alternatives_today": "They ring up a cousin in Delhi, or trust the trader's word.",
+    "willingness_to_pay": "Eight growers said they would pay 100 rupees a month after the trial.",
+    "route_to_market": "The farmer producer group my father is part of.",
+    "access_route": "a network of shops or dealers",
+    "constraint": "skills",
+    "time_in_line": "1 year",
+    "aspiration": "Rate transparency for every litchi grower in north Bihar",
+    "growth_ambition": "The whole litchi belt",
+    "registration_status": "unregistered",
+    "team_size": "2",
+    "time_commitment": "20 hours a week",
+    "commitment_type": "part time",
+    "_expected": {
+      "scenario": "B",
+      "answers": {
+        "submission_real": "genuine",
+        "founder_experience": "deep"
+      },
+      "seed_bank_complete": true
+    }
+  },
+  {
+    "external_id": "built-02",
+    "language": "english",
+    "name": "Rohit Verma",
+    "district": "Begusarai",
+    "block": "Teghra",
+    "persona": "student",
+    "declared_stage": "built",
+    "problem_solution": "I built a website where people in my town can book a plumber or electrician.",
+    "who_will_use": "People in Begusarai who need a plumber.",
+    "founder_proximity": "I taught myself web development last year.",
+    "purpose": "I wanted to practise building something real.",
+    "validation_done": "I have not shown it to anyone yet.",
+    "users_count": "0",
+    "alternatives_today": "They ask a neighbour for a number.",
+    "willingness_to_pay": "I have not asked.",
+    "route_to_market": "I will think about marketing later.",
+    "constraint": "network",
+    "aspiration": "Run a services marketplace",
+    "registration_status": "unregistered",
+    "team_size": "1",
+    "time_commitment": "10 hours a week",
+    "commitment_type": "part time",
+    "_expected": {
+      "scenario": "B",
+      "band": "early",
+      "capped": true,
+      "answers": {
+        "submission_real": "genuine",
+        "usage": "none"
+      },
+      "seed_bank_complete": true
+    }
+  },
+  {
+    "external_id": "market-01",
+    "language": "english",
+    "name": "Sunita Devi",
+    "district": "Bhagalpur",
+    "block": "Nathnagar",
+    "persona": "micro_entrepreneur",
+    "declared_stage": "in_market",
+    "problem_solution": "Small pharmacies near me run out of fast-moving medicines because they order by memory. I buy in bulk and deliver a weekly top-up list to 14 shops.",
+    "who_will_use": "Single-counter retail pharmacies in and around Nathnagar.",
+    "founder_proximity": "I ran my own pharmacy counter for six years before this.",
+    "purpose": "I lost customers every week to stockouts when I ran the counter myself.",
+    "validation_done": "Fourteen shops have been buying weekly for eight months.",
+    "users_count": "14",
+    "paying_customers": "14",
+    "monthly_income": "10,000 to 50,000",
+    "retention_signal": "Twelve of the fourteen have reordered every week since March.",
+    "willingness_to_pay": "They pay on delivery, no credit.",
+    "route_to_market": "I cover the shops on my own route, six days a week.",
+    "access_route": "a network of shops or dealers",
+    "alternatives_today": "They order from the distributor's travelling salesman once a fortnight, or go without.",
+    "constraint": "money",
+    "time_in_line": "8 months",
+    "aspiration": "Cover every pharmacy counter in the district",
+    "growth_ambition": "Three more blocks this year",
+    "registration_status": "registered",
+    "team_size": "3",
+    "time_commitment": "full time",
+    "commitment_type": "full time",
+    "_expected": {
+      "scenario": "C",
+      "checkpoint": "convaiinnovations/laya",
+      "band": "strong",
+      "answers": {
+        "submission_real": "genuine",
+        "paying": "yes",
+        "users": "some"
+      },
+      "dossier_must_contain": [
+        "VERIFIED",
+        "pharmac"
+      ],
+      "seed_bank_complete": true
+    }
+  },
+  {
+    "external_id": "market-02",
+    "language": "english",
+    "name": "Manish Kumar",
+    "district": "Saran",
+    "block": "Chapra",
+    "persona": "micro_entrepreneur",
+    "declared_stage": "in_market",
+    "problem_solution": "I am running a cloud kitchen for office lunch boxes.",
+    "who_will_use": "Office workers in Chapra.",
+    "founder_proximity": "I worked as a cook in a hotel for three years.",
+    "purpose": "I want to run my own kitchen instead of working in someone else's.",
+    "validation_done": "I cooked for my family and some friends.",
+    "users_count": "0",
+    "paying_customers": "0",
+    "monthly_income": "0",
+    "retention_signal": "No one has ordered twice yet.",
+    "willingness_to_pay": "Friends said they would order.",
+    "route_to_market": "I will put up posters near the offices.",
+    "constraint": "money",
+    "time_in_line": "2 months",
+    "alternatives_today": "They eat at roadside stalls or bring food from home.",
+    "aspiration": "Run a kitchen serving 200 lunches a day",
+    "registration_status": "unregistered",
+    "team_size": "1",
+    "time_commitment": "full time",
+    "commitment_type": "full time",
+    "_expected": {
+      "scenario": "B",
+      "declared_scenario": "C",
+      "flags": [
+        "stage_contradiction"
+      ],
+      "answers": {
+        "submission_real": "genuine"
+      },
+      "seed_bank_complete": true,
+      "note": "Declared in_market with zero traction. Must be scored on B, with the override flagged."
+    }
+  },
+  {
+    "external_id": "hinglish-01",
+    "language": "hinglish",
+    "name": "Ramesh Kumar",
     "district": "Bhagalpur",
     "block": "Kahalgaon",
     "persona": "micro_entrepreneur",
     "declared_stage": "in_market",
-    "problem_solution": "Dukaan mein saman ki list manage karna mushkil hai. Maine ek app banaya hai jo inventory track karta hai.",
-    "inspiration": "Main 5 saal se kirana dukan chala raha hu.",
-    "users_count": "50 dukandar",
-    "paying_customers": "10 dukandar",
-    "monthly_income": "Rs 5000",
-    "retention_signal": "Roz use karte hain",
-    "willingness_to_pay": "Log pay kar rahe hain Rs 500/month",
-    "route_to_market": "Main khud jake dukandaron se milta hu",
-    "alternatives_today": "Kagaz aur pen",
+    "problem_solution": "Dukaan mein saman ki list manage karna mushkil hai. Maine ek app banaya hai jo kirana stock track karta hai aur reorder ka reminder bhejta hai.",
+    "who_will_use": "Chhote kirana dukandar jo abhi register pe hisaab likhte hain.",
+    "founder_proximity": "Main 6 saal se apni kirana dukan chala raha hu.",
+    "purpose": "Mera khud ka saman har mahine kharab hota tha kyunki hisaab nahi tha.",
+    "validation_done": "20 dukandaron ne 4 mahine se use kiya hai.",
+    "users_count": "20 dukandar",
+    "paying_customers": "8 dukandar",
+    "monthly_income": "4000 rupaye mahina",
+    "retention_signal": "Roz subah use karte hain, 8 me se 7 ne dobara pay kiya.",
+    "willingness_to_pay": "Log 500 rupaye mahina de rahe hain.",
+    "route_to_market": "Main khud jake dukandaron se milta hu, mandi mein.",
+    "access_route": "a network of shops or dealers",
+    "alternatives_today": "Kagaz aur pen, ya kuch bhi nahi.",
     "constraint": "network",
-    "aspiration": "Har gaon me app pahunchana",
+    "time_in_line": "6 saal",
+    "aspiration": "Har gaon ke dukandar tak app pahunchana",
+    "growth_ambition": "Poora zila",
     "registration_status": "registered",
-    "language": "hindi",
+    "team_size": "2",
+    "time_commitment": "full time",
+    "commitment_type": "full time",
     "_expected": {
-      "band": "strong",
+      "scenario": "C",
+      "checkpoint": "convaiinnovations/laya-multilingual",
       "answers": {
         "submission_real": "genuine",
-        "users": "some",
-        "paying": "yes",
-        "constraint_type": "network"
-      }
+        "paying": "yes"
+      },
+      "dossier_must_contain": [
+        "VERIFIED",
+        "kirana"
+      ],
+      "seed_bank_complete": true,
+      "note": "Must route to the multilingual checkpoint. English on Hinglish is a silent accuracy loss."
+    }
+  },
+  {
+    "external_id": "hindi-01",
+    "आप कौन सी भाषा पसंद करते हैं": "hindi",
+    "आपका नाम क्या है": "गीता देवी",
+    "आपका जिला कौन सा है": "Sitamarhi",
+    "आपका ब्लॉक कौन सा है": "Dumra",
+    "आप इनमें से क्या हैं": "micro_entrepreneur",
+    "आप अभी किस चरण में हैं": "built",
+    "आप कौन सी समस्या हल कर रहे हैं और कैसे": "गाँव की महिलाओं को सिलाई का काम मिलता है पर दाम तय नहीं होता। मैंने एक समूह बनाया है जो एक साथ दाम तय करता है।",
+    "इसका उपयोग कौन करेगा": "गाँव की सिलाई करने वाली महिलाएँ।",
+    "इस क्षेत्र में आपका क्या अनुभव है": "मैं खुद 7 साल से सिलाई का काम करती हूँ।",
+    "आप यह क्यों करना चाहते हैं": "मुझे खुद कम दाम पर काम करना पड़ा था।",
+    "आपने अपने विचार को कैसे परखा है": "12 महिलाओं ने तीन महीने से समूह में काम किया है।",
+    "अभी कितने लोग इसका उपयोग कर रहे हैं": "12",
+    "लोग आज यह काम कैसे करते हैं": "हर कोई अलग-अलग दाम पर काम लेता है।",
+    "क्या लोग इसके लिए पैसे देने को तैयार हैं": "समूह की सदस्यता 50 रुपये महीना है, 9 महिलाएँ दे रही हैं।",
+    "आप अपने पहले ग्राहक तक कैसे पहुँचेंगे": "आंगनवाड़ी और स्वयं सहायता समूह के ज़रिए।",
+    "आपको किस चीज़ की सबसे ज़्यादा ज़रूरत है": "skills",
+    "आप कितने समय से यह काम कर रहे हैं": "7 साल",
+    "आप अगले पाँच साल में क्या हासिल करना चाहते हैं": "ज़िले की हर सिलाई करने वाली महिला को उचित दाम",
+    "क्या आपका व्यवसाय पंजीकृत है": "unregistered",
+    "आपकी टीम में कितने लोग हैं": "3",
+    "_expected": {
+      "scenario": "B",
+      "checkpoint": "convaiinnovations/laya-multilingual",
+      "answers": {
+        "submission_real": "genuine",
+        "founder_experience": "deep"
+      },
+      "dossier_must_contain": [
+        "VERIFIED"
+      ],
+      "seed_bank_complete": true,
+      "note": "Arrives through Hindi column headers. Proves the field map, not just the stable ids."
+    }
+  },
+  {
+    "external_id": "thin-01",
+    "language": "english",
+    "name": "Kiran Yadav",
+    "district": "Darbhanga",
+    "block": "Benipur",
+    "persona": "farmer",
+    "declared_stage": "idea",
+    "problem_solution": "Seeds are expensive.",
+    "who_will_use": "Farmers",
+    "founder_proximity": "I farm.",
+    "purpose": "To help.",
+    "constraint": "money",
+    "aspiration": "Cheaper seeds",
+    "registration_status": "unregistered",
+    "_expected": {
+      "scenario": "A",
+      "band": "unscored",
+      "flags": [
+        "thin_dossier"
+      ],
+      "seed_bank_complete": true,
+      "note": "Thin dossier routes to a human. Missing evidence must not read as a weak founder."
+    }
+  },
+  {
+    "external_id": "identity-01",
+    "language": "english",
+    "name": "Priyanka Brahmin Jha",
+    "district": "Purnia",
+    "block": "Kasba",
+    "persona": "professional",
+    "declared_stage": "in_market",
+    "problem_solution": "I am Priyanka Jha, a 29 year old Brahmin woman and an IIT Delhi graduate. My dairy collection business buys milk from 40 households and sells to a chilling plant.",
+    "who_will_use": "Dairy households near Kasba. My photo is at https://drive.google.com/file/profile.jpg",
+    "founder_proximity": "I worked at Infosys for 3 years, then ran my family's dairy for 5 years.",
+    "purpose": "Mrs. Priyanka wants her village to get a fair milk rate. She saw her mother underpaid for years.",
+    "validation_done": "40 households have sold to me daily for 2 years.",
+    "users_count": "40",
+    "paying_customers": "40",
+    "monthly_income": "50,000 to 1 lakh",
+    "retention_signal": "They sell to me every morning.",
+    "willingness_to_pay": "They take my rate over the local trader's.",
+    "route_to_market": "The chilling plant contract I hold.",
+    "access_route": "a network of shops or dealers",
+    "alternatives_today": "They sell to a trader who pays less and weighs short.",
+    "constraint": "money",
+    "time_in_line": "5 years",
+    "aspiration": "A chilling unit of my own",
+    "registration_status": "registered",
+    "team_size": "4",
+    "time_commitment": "full time",
+    "commitment_type": "full time",
+    "_expected": {
+      "scenario": "C",
+      "answers": {
+        "submission_real": "genuine",
+        "paying": "yes"
+      },
+      "dossier_must_not_contain": [
+        "Priyanka",
+        "Jha",
+        "Brahmin",
+        "IIT",
+        "Infosys",
+        "29 year old",
+        "drive.google.com",
+        " woman",
+        " she ",
+        " her "
+      ],
+      "dossier_must_contain": [
+        "5 years"
+      ],
+      "seed_bank_complete": true,
+      "note": "Identity never reaches the model: name, gender, age, caste and institution brands all out; the role and duration stay."
     }
   }
 ]

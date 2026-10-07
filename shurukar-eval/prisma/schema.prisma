@@ -8,72 +8,119 @@ datasource db {
 }
 
 model Candidate {
-  id          String   @id @default(cuid())
-  externalId  String   @unique          // row id from the intake export
-  district    String
-  block       String
-  persona     String                    // the six-option answer
-  declaredStage String                  // idea | built | in_market, as they said
-  language    String   @default("unknown")
-  consentAt   DateTime?
-  createdAt   DateTime @default(now())
-  responses   RawResponse[]
-  dossiers    Dossier[]
-  assessments Assessment[]
+  id            String          @id @default(cuid())
+  externalId    String          @unique // row id from the intake export
+  district      String
+  block         String
+  persona       String // the six-option answer
+  declaredStage String // idea | built | in_market, as they said
+  language      String          @default("unknown")
+  consentAt     DateTime?
+  createdAt     DateTime        @default(now())
+  responses     RawResponse[]
+  dossiers      Dossier[]
+  assessments   Assessment[]
+  seedBank      SeedBankRecord?
+}
+
+/// Captured for every candidate at ingest, whether or not they are ever
+/// scored. A founder who answered through the router and stopped still has a
+/// place in the programme's SEED Bank, so this must never depend on Laya.
+model SeedBankRecord {
+  id             String    @id @default(cuid())
+  candidateId    String    @unique
+  aspiration     String?
+  block          String?
+  status         String? // registration status, as declared
+  constraintType String? // what the programme acts on
+  persona        String?
+  declaredStage  String?
+  district       String?
+  complete       Boolean   @default(false)
+  missingFields  String    @default("[]") // JSON string[]
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  candidate      Candidate @relation(fields: [candidateId], references: [id])
 }
 
 model RawResponse {
-  id          String   @id @default(cuid())
+  id          String    @id @default(cuid())
   candidateId String
-  fieldId     String                    // stable id, NOT the column header
+  fieldId     String // stable id, NOT the column header
   value       String
   candidate   Candidate @relation(fields: [candidateId], references: [id])
+
   @@index([candidateId])
 }
 
 model Dossier {
-  id          String   @id @default(cuid())
-  candidateId String
-  version     Int
-  payload     String                    // exactly what is sent as Laya's state (JSON)
-  tokenCount  Int
+  id               String    @id @default(cuid())
+  candidateId      String
+  version          Int
+  payload          String // exactly what is sent as Laya's state (JSON)
+  tokenCount       Int
   distillerVersion String
-  createdAt   DateTime @default(now())
-  candidate   Candidate @relation(fields: [candidateId], references: [id])
-  layaRuns    LayaRun[]
+  createdAt        DateTime  @default(now())
+  candidate        Candidate @relation(fields: [candidateId], references: [id])
+  layaRuns         LayaRun[]
+
   @@unique([candidateId, version])
 }
 
 model LayaRun {
-  id            String   @id @default(cuid())
-  dossierId     String
-  scenario      String                  // A | B | C
+  id                 String   @id @default(cuid())
+  dossierId          String
+  scenario           String // A | B | C
   questionSetVersion String
   modelCheckpoint    String
-  questionsSent String                  // JSON
-  answers       String                  // JSON { key: { value, probabilities, confidence } }
-  status        String                  // scored | unscored
-  error         String?
-  latencyMs     Int?
-  createdAt     DateTime @default(now())
-  dossier       Dossier @relation(fields: [dossierId], references: [id])
+  questionsSent      String // JSON
+  answers            String // JSON { key: { value, probabilities, confidence } }
+  status             String // scored | unscored
+  error              String?
+  latencyMs          Int?
+  createdAt          DateTime @default(now())
+  dossier            Dossier  @relation(fields: [dossierId], references: [id])
 }
 
 model Assessment {
-  id             String   @id @default(cuid())
-  candidateId    String
-  layaRunId      String?
-  founderProblem Int?                   // 0-100, null when unscored
-  problemSolution Int?
-  solutionMarket Int?
-  band           String                 // strong | promising | early | unscored
-  cappedBy       String?                // which floor fired, if any
-  flags          String                 // JSON string[]
-  confidence     Float?
-  reviewerDecision String?              // advance | hold | needs_info | null
-  reviewerNote   String?
-  reviewedBy     String?
-  reviewedAt     DateTime?
-  createdAt      DateTime @default(now())
-  candidate      Candidate @relation(fields: [candidateId], references: [id])
+  id                 String    @id @default(cuid())
+  candidateId        String
+  layaRunId          String?
+  founderProblem     Int? // 0-100, null when unscored
+  problemSolution    Int?
+  solutionMarket     Int?
+  band               String // strong | promising | early | unscored
+  cappedBy           String? // which floor fired, if any
+  flags              String // JSON string[]
+  confidence         Float?
+  // Sortable composite, used ONLY for the within-band rank. Never shown as a
+  // headline number — it is uncalibrated and a percentage would be read as one.
+  composite          Int?
+  scenario           String? // A | B | C, as scored
+  // Denormalised so a ranking can never span question-set versions or
+  // checkpoints, which are not comparable with each other.
+  questionSetVersion String?
+  modelCheckpoint    String?
+  distillerVersion   String?
+  // True when a decisive answer was missing or low-confidence: a human decides,
+  // the model does not. Usually a thin dossier, not a weak founder.
+  needsHuman         Boolean   @default(false)
+  /// True for the newest assessment of a candidate. A re-score appends a row
+  /// rather than replacing one, so filters and ranks must target this flag —
+  /// otherwise a superseded score keeps matching a reviewer's filter.
+  isLatest           Boolean   @default(true)
+  /// Reviewer-facing explanation, assembled from labels in code. Laya never
+  /// generates prose, so this is built deterministically from the typed answers.
+  explanation        String    @default("[]") // JSON string[]
+  reviewerDecision   String? // advance | hold | needs_info | null
+  reviewerNote       String?
+  reviewedBy         String?
+  reviewedAt         DateTime?
+  createdAt          DateTime  @default(now())
+  candidate          Candidate @relation(fields: [candidateId], references: [id])
+
+  @@index([candidateId])
+  @@index([band])
+  @@index([isLatest])
+  @@index([band, composite])
 }
