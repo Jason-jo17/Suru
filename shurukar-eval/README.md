@@ -47,6 +47,76 @@ LAYA_API_KEY=test LAYA_BASE_URL=http://localhost:4555 npm run score
 LAYA_API_KEY=test LAYA_BASE_URL=http://localhost:4555 npm run acceptance
 ```
 
+## Deploying with Docker
+
+```bash
+cp .env.docker.example .env      # set POSTGRES_PASSWORD at minimum
+docker compose build
+docker compose up -d
+```
+
+The app comes up on `http://localhost:3000/candidates` with Postgres beside it.
+The entrypoint syncs the schema on start (`RUN_DB_PUSH=0` to skip it).
+
+Load and score a cohort inside the container:
+
+```bash
+docker compose exec app node dist/scripts/ingest.js test/candidates.json
+docker compose exec app node dist/scripts/runPipeline.js
+```
+
+Point `ingest.js` at your own export instead of the fixture — mount it, or copy
+it in with `docker compose cp`. Any column the field map does not know stops the
+import and is named; add it to `src/lib/ingest/fieldMap.ts` rather than letting
+it be dropped.
+
+### Secrets
+
+Put them in `.env` beside `docker-compose.yml`; compose reads it automatically
+and `.gitignore` already excludes it.
+
+| Variable | |
+|---|---|
+| `POSTGRES_PASSWORD` | required; compose fails loudly without it |
+| `LAYA_API_KEY` | your AutoExtract key (`bpl_...`). Server-side only — it is never sent to client code. **Leaving it empty is supported**: the pipeline runs end to end and every candidate lands `unscored`, visible in the UI and still in the human queue. |
+| `LAYA_BASE_URL` | defaults to `https://autoextract.theboringpeople.in/api/laya` |
+| `OPENROUTER_API_KEY` | read by nothing yet — see below |
+
+### Notes on the image
+
+- One schema serves both engines: `scripts/setDbProvider.mjs` writes the
+  provider line from `DATABASE_URL`, so local work and the acceptance suite stay
+  on SQLite while the container runs Postgres.
+- The CLI scripts are bundled to plain JS at build time, because the runtime
+  image carries no TypeScript toolchain.
+- Prisma generates a musl engine alongside the native one, which is what the
+  Alpine runtime needs.
+- Schema sync on start uses `db push`. For a cohort you care about, generate
+  real migrations against Postgres first and switch the entrypoint to
+  `migrate deploy`.
+
+## Stage 0 — extraction (not built)
+
+Laya reads text only: no vision, no PDF parsing, no audio. Anything submitted as
+a photo, a voice note, a video or a PDF has to become text *before* ingest.
+That layer does not exist yet, and `OPENROUTER_API_KEY` is carried through the
+container for it.
+
+Two rules it has to be built under, when it is:
+
+- **Transcription, not summarization.** It may OCR and transcribe verbatim. The
+  moment it paraphrases, rates or condenses a founder's answer, it has moved the
+  distiller's "never editorialise" problem upstream where nothing catches it,
+  and the score starts measuring the extractor's opinion.
+- **Never on the scoring path.** Extracted text is evidence like any other
+  answer, marked with its own provenance so a reviewer can see the founder did
+  not type it. A failed extraction leaves the field absent — which lowers
+  confidence and routes to a human — rather than guessing.
+
+It must never be wired to scoring or used as a fallback when Laya is down. An
+LLM standing in for Laya silently changes what a band means, with nothing in the
+UI showing it.
+
 ## The constraints this is built from
 
 | | Where it lives |

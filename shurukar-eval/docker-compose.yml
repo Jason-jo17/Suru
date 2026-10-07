@@ -1,0 +1,55 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: shurukar
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: shurukar
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U shurukar -d shurukar']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    # Not published by default: only the app needs to reach it. Uncomment to
+    # connect a client from the host.
+    # ports:
+    #   - '5432:5432'
+
+  app:
+    build:
+      context: .
+      args:
+        DATABASE_URL: postgresql://placeholder
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://shurukar:${POSTGRES_PASSWORD}@db:5432/shurukar?schema=public
+      # Server-side only, never exposed to client code. Unset is a supported
+      # state: the pipeline still runs and every candidate lands `unscored`.
+      LAYA_API_KEY: ${LAYA_API_KEY:-}
+      LAYA_BASE_URL: ${LAYA_BASE_URL:-}
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
+      CONFIDENCE_FLOOR: ${CONFIDENCE_FLOOR:-}
+      THIN_DOSSIER_TOKENS: ${THIN_DOSSIER_TOKENS:-}
+      QUESTION_SET_VERSION: ${QUESTION_SET_VERSION:-}
+    ports:
+      - '${PORT:-3000}:3000'
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - >-
+          node -e "fetch('http://127.0.0.1:3000/candidates')
+          .then(r => process.exit(r.ok ? 0 : 1))
+          .catch(() => process.exit(1))"
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+
+volumes:
+  pgdata:
