@@ -86,12 +86,20 @@ export default async function CandidatesPage(props: {
     (r) => r.assessments[0] && r.assessments[0].questionSetVersion !== currentVersion,
   ).length
   const scoreCounts = {
-    unscored: scoreRows.filter((r) => {
+    // Only candidates a rerun can actually help: never assessed, or assessed
+    // under a superseded question set. A candidate that ran and came back
+    // `unscored` is counted separately — another run cannot change it.
+    pending: scoreRows.filter((r) => {
       const latest = r.assessments[0]
       if (!latest) return true
-      return latest.questionSetVersion !== currentVersion || latest.band === 'unscored'
+      return latest.questionSetVersion !== currentVersion
     }).length,
     stale: staleCount,
+    unscoreable: scoreRows.filter(
+      (r) =>
+        r.assessments[0]?.band === 'unscored' &&
+        r.assessments[0]?.questionSetVersion === currentVersion,
+    ).length,
     total: scoreRows.length,
     layaConfigured: Boolean(process.env.LAYA_API_KEY),
     questionSetVersion: currentVersion,
