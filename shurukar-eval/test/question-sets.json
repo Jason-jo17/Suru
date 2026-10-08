@@ -23,7 +23,12 @@
     "validation_effort": {
       "type": "score",
       "instructions": "How far has the founder gone to test this idea?",
-      "criteria": ["none", "asked_a_few", "asked_many", "tested_with_users"]
+      "criteria": [
+        "none",
+        "asked_a_few",
+        "asked_many",
+        "tested_with_users"
+      ]
     },
     "founder_proximity": {
       "type": "choice",
@@ -90,6 +95,26 @@
         "genuine": "coherent responses",
         "spam": "gibberish, test data, or marketing spam"
       }
+    },
+    "sector": {
+      "type": "choice",
+      "instructions": "What kind of work is this venture in?",
+      "criteria": {
+        "agriculture": "farming, livestock, fishery or produce",
+        "food_processing": "making, packing or preserving food",
+        "textiles_handicraft": "cloth, stitching, weaving, handicraft",
+        "retail_trading": "buying and reselling goods, a shop",
+        "manufacturing": "making a physical product other than food or cloth",
+        "repair_services": "repairing or servicing machines, vehicles, electronics",
+        "education_training": "teaching, coaching, skills",
+        "health_wellness": "medicine, clinics, health products",
+        "logistics_transport": "moving goods or people, storage",
+        "digital_software": "an app, a website or a software service",
+        "tourism_hospitality": "tourists, guides, lodging, events",
+        "financial_services": "lending, savings, insurance, payments",
+        "other": "none of these",
+        "unclear": "cannot tell from what the founder wrote"
+      }
     }
   },
   "B": {
@@ -115,7 +140,12 @@
     "validation_effort": {
       "type": "score",
       "instructions": "How far has the founder gone to test this?",
-      "criteria": ["none", "asked_a_few", "asked_many", "tested_with_users"]
+      "criteria": [
+        "none",
+        "asked_a_few",
+        "asked_many",
+        "tested_with_users"
+      ]
     },
     "addresses_problem": {
       "type": "choice",
@@ -190,6 +220,26 @@
       "criteria": {
         "genuine": "coherent responses",
         "spam": "gibberish, test data, or marketing spam"
+      }
+    },
+    "sector": {
+      "type": "choice",
+      "instructions": "What kind of work is this venture in?",
+      "criteria": {
+        "agriculture": "farming, livestock, fishery or produce",
+        "food_processing": "making, packing or preserving food",
+        "textiles_handicraft": "cloth, stitching, weaving, handicraft",
+        "retail_trading": "buying and reselling goods, a shop",
+        "manufacturing": "making a physical product other than food or cloth",
+        "repair_services": "repairing or servicing machines, vehicles, electronics",
+        "education_training": "teaching, coaching, skills",
+        "health_wellness": "medicine, clinics, health products",
+        "logistics_transport": "moving goods or people, storage",
+        "digital_software": "an app, a website or a software service",
+        "tourism_hospitality": "tourists, guides, lodging, events",
+        "financial_services": "lending, savings, insurance, payments",
+        "other": "none of these",
+        "unclear": "cannot tell from what the founder wrote"
       }
     }
   },
@@ -295,6 +345,26 @@
       "criteria": {
         "genuine": "coherent responses",
         "spam": "gibberish, test data, or marketing spam"
+      }
+    },
+    "sector": {
+      "type": "choice",
+      "instructions": "What kind of work is this venture in?",
+      "criteria": {
+        "agriculture": "farming, livestock, fishery or produce",
+        "food_processing": "making, packing or preserving food",
+        "textiles_handicraft": "cloth, stitching, weaving, handicraft",
+        "retail_trading": "buying and reselling goods, a shop",
+        "manufacturing": "making a physical product other than food or cloth",
+        "repair_services": "repairing or servicing machines, vehicles, electronics",
+        "education_training": "teaching, coaching, skills",
+        "health_wellness": "medicine, clinics, health products",
+        "logistics_transport": "moving goods or people, storage",
+        "digital_software": "an app, a website or a software service",
+        "tourism_hospitality": "tourists, guides, lodging, events",
+        "financial_services": "lending, savings, insurance, payments",
+        "other": "none of these",
+        "unclear": "cannot tell from what the founder wrote"
       }
     }
   }

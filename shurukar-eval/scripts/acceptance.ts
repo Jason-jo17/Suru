@@ -14,10 +14,15 @@ import { execFileSync } from 'child_process'
 const scratch = fs.mkdtempSync(path.join(os.tmpdir(), 'shurukar-acceptance-'))
 process.env.DATABASE_URL = `file:${path.join(scratch, 'acceptance.db')}`
 
-execFileSync('npx', ['prisma', 'db', 'push', '--skip-generate', '--accept-data-loss'], {
-  stdio: 'pipe',
-  env: process.env,
-})
+// execFileSync does not go through a shell, and on Windows the executable is
+// `npx.cmd` — plain 'npx' is ENOENT there. Naming the right binary is better
+// than `shell: true`, which concatenates arguments unescaped and trips Node's
+// DEP0190 security warning.
+execFileSync(
+  process.platform === 'win32' ? 'npx.cmd' : 'npx',
+  ['prisma', 'db', 'push', '--skip-generate', '--accept-data-loss'],
+  { stdio: 'pipe', env: process.env },
+)
 
 /* eslint-disable import/first */
 import { prisma } from '../src/lib/db'

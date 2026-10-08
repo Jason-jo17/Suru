@@ -37,6 +37,10 @@ model SeedBankRecord {
   block          String?
   status         String? // registration status, as declared
   constraintType String? // what the programme acts on
+  /// Derived by Laya from the founder's own description, not asked at intake.
+  /// A reviewable classification, never ground truth — the detail page shows it
+  /// beside the problem text so a reviewer can correct it.
+  sector         String?
   persona        String?
   declaredStage  String?
   district       String?

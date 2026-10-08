@@ -28,8 +28,19 @@ import {
  * typed labels.
  */
 
-/** Below this, a decisive answer is not trusted and a human decides instead. */
-const CONFIDENCE_FLOOR = Number(process.env.CONFIDENCE_FLOOR || 0.1)
+/**
+ * A decisive answer is distrusted when the model barely preferred its chosen
+ * label over a coin toss. Measured as P(chosen) ÷ the uniform baseline for that
+ * question's own label count, so a 2-label and a 6-label question are judged on
+ * the same scale — an absolute floor punishes questions with more labels.
+ *
+ * 1.25 is derived, not picked. Over the 127 answers of the labelled cohort the
+ * ratio runs 1.09 min · 1.41 p25 · 1.76 median · 3.44 max, and 1.25 flags the
+ * 7% sitting closest to chance. RE-DERIVE IT whenever the question set, the
+ * distiller or the checkpoint changes: a threshold carried over from a
+ * different question set is a guess wearing a number.
+ */
+const CHANCE_RATIO_FLOOR = Number(process.env.CHANCE_RATIO_FLOOR || 1.25)
 
 /**
  * Below this much content across a scenario's five decisive fields, there was
@@ -52,7 +63,15 @@ export function labelOf(key: string, answer: LayaAnswer | undefined, scenario: S
     const question = questionSetFor(scenario)[key]
     if (!question) return null
     const labels = labelsFor(question)
-    return labels[answer.score] ?? null
+    if (labels.length === 0) return null
+    // A score question returns the EXPECTED position on the scale, which is
+    // fractional — 2.0296, never 2. Indexing the label array with it raw
+    // yields undefined, which the caller then reads as "no answer": that is
+    // why every validation_effort came back missing on the first live run.
+    // Round to the nearest position and clamp, so a 3.7 on a four-label scale
+    // lands on the last label rather than falling off the end.
+    const index = Math.min(labels.length - 1, Math.max(0, Math.round(answer.score)))
+    return labels[index] ?? null
   }
   return null
 }
@@ -61,15 +80,52 @@ interface QuestionReading {
   key: string
   label: string | null
   value: number | null
+  /** P(chosen label), from `answer_confidence`. */
   confidence: number | null
+  /** P(chosen) ÷ uniform chance for this question's label count. */
+  chanceRatio: number | null
   missing: boolean
   weight: number
+}
+
+/**
+ * P(chosen label). Prefers `answer_confidence`; falls back to reading the chosen
+ * label straight out of `probabilities` for responses that predate the field.
+ * Deliberately never reads `confidence`, which is a peakedness metric on
+ * another scale entirely.
+ */
+export function answerConfidenceOf(answer: LayaAnswer | undefined): number | null {
+  if (!answer) return null
+  if (typeof answer.answer_confidence === 'number') return answer.answer_confidence
+  const probs = answer.probabilities
+  if (probs) {
+    if (typeof answer.choice === 'string' && typeof probs[answer.choice] === 'number') {
+      return probs[answer.choice]
+    }
+    const best = Math.max(...Object.values(probs).filter((p) => typeof p === 'number'))
+    if (Number.isFinite(best)) return best
+  }
+  if (typeof answer.noul === 'number') return Math.max(answer.noul, 1 - answer.noul)
+  return null
+}
+
+/**
+ * How far above a coin toss the chosen label sits, given how many labels this
+ * question offered. Null when the label count is unknown, so a missing
+ * distribution never silently reads as "confident".
+ */
+export function chanceRatioOf(answer: LayaAnswer | undefined, confidence: number | null): number | null {
+  if (confidence === null) return null
+  const labelCount = answer?.probabilities ? Object.keys(answer.probabilities).length : 0
+  if (labelCount < 2) return null
+  return confidence * labelCount
 }
 
 function read(key: string, answers: LayaAnswers, scenario: Scenario): QuestionReading {
   const answer = answers[key]
   const label = labelOf(key, answer, scenario)
-  const confidence = typeof answer?.confidence === 'number' ? answer.confidence : null
+  const confidence = answerConfidenceOf(answer)
+  const chanceRatio = chanceRatioOf(answer, confidence)
   const table = LABEL_VALUES[key] ?? {}
   const normalized = label ? label.trim().toLowerCase() : null
   const missing = isMissing(normalized) || normalized === null || !(normalized in table)
@@ -79,6 +135,7 @@ function read(key: string, answers: LayaAnswers, scenario: Scenario): QuestionRe
     label,
     value: missing ? null : table[normalized as string],
     confidence,
+    chanceRatio,
     missing,
     weight: weightFor(key),
   }
@@ -185,7 +242,7 @@ export function assemble(
   // --- confidence and missing evidence on decisive questions ---
   const decisive = DECISIVE_QUESTIONS[scenario].map((k) => read(k, answers, scenario))
   const lowConfidence = decisive.filter(
-    (r) => r.confidence !== null && r.confidence < CONFIDENCE_FLOOR,
+    (r) => r.chanceRatio !== null && r.chanceRatio < CHANCE_RATIO_FLOOR,
   )
   const missingDecisive = decisive.filter((r) => r.missing)
   const thinDossier =
@@ -195,8 +252,11 @@ export function assemble(
   for (const r of missingDecisive) flags.push(`missing_evidence:${r.key}`)
   if (thinDossier) flags.push('thin_dossier')
 
+  // The mean P(chosen label) across every answer. Reads as "the model averaged
+  // this much on the labels it picked", which is interpretable; the sibling
+  // `confidence` field is not.
   const allConfidences = Object.values(answers)
-    .map((a) => (typeof a?.confidence === 'number' ? a.confidence : null))
+    .map((a) => answerConfidenceOf(a))
     .filter((c): c is number => c !== null)
   const confidence =
     allConfidences.length > 0
@@ -379,6 +439,19 @@ export async function assembleAssessment(layaRunId: string): Promise<Assessment>
   // A re-score appends. The previous assessment stays on the record — it may be
   // the one a reviewer already acted on — but stops being the one that filters
   // and ranks see.
+  // Sector is DERIVED from the founder's own description — intake never asks
+  // it — so it lands on the SEED Bank record rather than the assessment: it is
+  // regional intelligence about the cohort, not a judgement about the person,
+  // and it stays useful for a candidate who is never banded. `unclear` is kept
+  // as a value rather than dropped, so "we could not tell" is countable.
+  const sectorLabel = labelOf('sector', answers['sector'], scenario)
+  if (sectorLabel) {
+    await prisma.seedBankRecord.updateMany({
+      where: { candidateId },
+      data: { sector: sectorLabel.trim().toLowerCase() },
+    })
+  }
+
   const [, created] = await prisma.$transaction([
     prisma.assessment.updateMany({
       where: { candidateId, isLatest: true },
