@@ -41,7 +41,19 @@ export interface LayaAnswer {
   /** P(true) as returned by the model. */
   noul?: number
   probabilities?: Record<string, number>
+  /**
+   * A peakedness metric over the whole distribution — NOT the probability of
+   * the chosen label, and on a different scale. A clear winner at P=0.52
+   * reports `confidence` 0.16. Kept because the API returns it; never
+   * threshold on it.
+   */
   confidence?: number
+  /**
+   * P(chosen label) — the number to reason about when asking how sure the model
+   * is. Thresholding `confidence` instead of this is what forced 10 of 12
+   * candidates to `unscored` on the first live run.
+   */
+  answer_confidence?: number
 }
 
 export type LayaAnswers = Record<string, LayaAnswer>
