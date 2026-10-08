@@ -1,6 +1,9 @@
 import Link from 'next/link'
 import Filters from '@/components/Filters'
 import HeaderStats from '@/components/HeaderStats'
+import CohortIntelligence from '@/components/CohortIntelligence'
+import ScoreButton from '@/components/ScoreButton'
+import { questionSetVersion } from '@/lib/laya/questionSets'
 import { BandChip, FitChip, FlagChip } from '@/components/BandChip'
 import { prisma } from '@/lib/db'
 import {
@@ -65,6 +68,35 @@ export default async function CandidatesPage(props: {
   }
 
   const ranks = await withinBandRanks(rows)
+  // Seeds the scoring button so its first paint names real numbers. A
+  // candidate needs scoring when it has no latest assessment, when that
+  // assessment is `unscored`, or when it was produced by a question set that is
+  // no longer current — a score from another version is not comparable.
+  const currentVersion = questionSetVersion()
+  const scoreRows = await prisma.candidate.findMany({
+    select: {
+      assessments: {
+        where: { isLatest: true },
+        select: { band: true, questionSetVersion: true },
+        take: 1,
+      },
+    },
+  })
+  const staleCount = scoreRows.filter(
+    (r) => r.assessments[0] && r.assessments[0].questionSetVersion !== currentVersion,
+  ).length
+  const scoreCounts = {
+    unscored: scoreRows.filter((r) => {
+      const latest = r.assessments[0]
+      if (!latest) return true
+      return latest.questionSetVersion !== currentVersion || latest.band === 'unscored'
+    }).length,
+    stale: staleCount,
+    total: scoreRows.length,
+    layaConfigured: Boolean(process.env.LAYA_API_KEY),
+    questionSetVersion: currentVersion,
+  }
+
   const totalPages = Math.max(1, Math.ceil(totalCount / perPage))
 
   const pageHref = (n: number) => {
@@ -102,6 +134,10 @@ export default async function CandidatesPage(props: {
       </div>
 
       <HeaderStats />
+
+      <ScoreButton initial={scoreCounts} />
+
+      <CohortIntelligence />
 
       <Filters
         districts={districts.map((d) => d.district)}

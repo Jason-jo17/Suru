@@ -18,6 +18,7 @@ export interface Filters {
   persona?: string
   band?: string
   language?: string
+  sector?: string
   registrationStatus?: string
   reviewerStatus?: string
   flagType?: string
@@ -109,6 +110,7 @@ export function parseFilters(params: Record<string, string | string[] | undefine
     persona: one('persona'),
     band: one('band'),
     language: one('language'),
+    sector: one('sector'),
     registrationStatus: one('registrationStatus'),
     reviewerStatus: one('reviewerStatus'),
     flagType: one('flagType'),
@@ -137,6 +139,7 @@ export function toSearchParams(filters: Filters): URLSearchParams {
     params.set(key, String(value))
   }
   set('district', filters.district)
+  set('sector', filters.sector)
   set('block', filters.block)
   set('q', filters.q)
   set('stage', filters.stage)
@@ -200,6 +203,12 @@ export function buildCandidateWhere(filters: Filters): Prisma.CandidateWhereInpu
 
   if (filters.registrationStatus) {
     and.push({ seedBank: { status: filters.registrationStatus } })
+  }
+
+  // Sector lives on the SEED Bank because it is derived for every candidate,
+  // including the ones who are never banded.
+  if (filters.sector) {
+    and.push({ seedBank: { sector: filters.sector } })
   }
 
   const assessment: Prisma.AssessmentWhereInput = { isLatest: true }
