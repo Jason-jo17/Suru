@@ -49,7 +49,7 @@ export function seedBankFromAnswers(
 ): SeedBankInput {
   return {
     aspiration: answers.aspiration ?? answers.growth_ambition ?? null,
-    block: answers.block ?? candidate.block ?? null,
+    block: answers.block ?? candidate.block ?? (answers.pin_code ? `PIN ${answers.pin_code}` : null),
     status: answers.registration_status ?? null,
     constraintType: answers.constraint ?? null,
     persona: answers.persona ?? candidate.persona ?? null,

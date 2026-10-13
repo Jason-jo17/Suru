@@ -7,13 +7,14 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
 model Candidate {
   id            String          @id @default(cuid())
   externalId    String          @unique // row id from the intake export
+  state         String          @default("Unknown")
   district      String
   block         String
   persona       String // the six-option answer

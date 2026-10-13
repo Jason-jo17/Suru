@@ -12,6 +12,9 @@ await build({
   entryPoints: [
     'scripts/ingest.ts',
     'scripts/runPipeline.ts',
+    'scripts/scoreBatches.ts',
+    'scripts/exportSnapshot.ts',
+    'scripts/importSnapshot.ts',
     'scripts/acceptance.ts',
   ],
   bundle: true,

@@ -8,13 +8,20 @@ import { CLAIMED_FIELDS, markClaimed, marketFindingFor } from './provenance'
  * silently changes every score with no error anywhere. Bump this on any change
  * to the shape, the ordering, the budget or the stripping it depends on.
  */
-export const DISTILLER_VERSION = 'distiller-2.0'
+export const DISTILLER_VERSION = 'distiller-2.1'
 
 /** Target budget for decisive content. Laya reads 512 tokens per question. */
 export const TOKEN_BUDGET = 400
 
-/** Hard per-value ceiling, so one long answer cannot eat the whole budget. */
-const MAX_TOKENS_PER_VALUE = 90
+/**
+ * Hard per-value ceiling, so one long answer cannot eat the whole budget.
+ *
+ * 2.1: lowered from 90. At 90, four long free-text answers filled the budget on
+ * their own and every short structured answer after them (people spoken to,
+ * would they pay, alternatives) was dropped — so the most detailed founders
+ * came back `unclear` on exactly the questions those answers decide.
+ */
+const MAX_TOKENS_PER_VALUE = 65
 
 export type Scenario = 'A' | 'B' | 'C'
 

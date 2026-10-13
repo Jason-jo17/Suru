@@ -20,19 +20,19 @@ const OPTIONS: Array<{ value: ReviewerDecision; label: string; key: string; tone
     value: 'advance',
     label: 'Advance',
     key: 'a',
-    tone: 'border-emerald-500/50 text-emerald-300 hover:bg-emerald-500/10 data-[active=true]:bg-emerald-500/20',
+    tone: 'border-emerald-500/50 text-emerald-700 hover:bg-emerald-500/10 data-[active=true]:bg-emerald-500/20',
   },
   {
     value: 'hold',
     label: 'Hold',
     key: 'h',
-    tone: 'border-amber-500/50 text-amber-300 hover:bg-amber-500/10 data-[active=true]:bg-amber-500/20',
+    tone: 'border-amber-500/50 text-amber-700 hover:bg-amber-500/10 data-[active=true]:bg-amber-500/20',
   },
   {
     value: 'needs_info',
     label: 'Needs info',
     key: 'i',
-    tone: 'border-sky-500/50 text-sky-300 hover:bg-sky-500/10 data-[active=true]:bg-sky-500/20',
+    tone: 'border-indigo-500/50 text-indigo-700 hover:bg-indigo-500/10 data-[active=true]:bg-indigo-500/20',
   },
 ]
 
@@ -98,18 +98,18 @@ export default function ReviewerActionBar({
   }, [act])
 
   return (
-    <div className="bg-[#0F172A] border border-[#1E293B] rounded-lg p-4 flex flex-col gap-3">
+    <div className="bg-surface border border-line rounded-card shadow-card p-4 flex flex-col gap-3">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div>
-          <h3 className="text-sm font-semibold">Reviewer decision</h3>
-          <p className="text-[11px] text-[#64748B] mt-0.5">
+          <h3 className="font-display text-lg font-semibold">Reviewer decision</h3>
+          <p className="text-[11px] text-ink-3 mt-0.5">
             This is the calibration set — thresholds are set by comparing these calls against the
             model&apos;s bands.
           </p>
         </div>
         {decision && (
-          <span className="text-[11px] font-mono text-[#94A3B8]">
-            current: <span className="text-white">{decision.replace('_', ' ')}</span>
+          <span className="text-[11px] font-mono text-ink-2">
+            current: <span className="text-ink">{decision.replace('_', ' ')}</span>
             {reviewedAt ? ` · ${reviewedAt}` : ''}
             {reviewedBy ? ` · ${reviewedBy}` : ''}
           </span>
@@ -132,7 +132,7 @@ export default function ReviewerActionBar({
       </div>
 
       <label className="flex flex-col gap-1.5">
-        <span className="text-[11px] text-[#94A3B8] font-mono">
+        <span className="text-[11px] text-ink-2 font-mono">
           Note <kbd>N</kbd> — why, in your words. Especially where you disagree with the band.
         </span>
         <textarea
@@ -141,7 +141,7 @@ export default function ReviewerActionBar({
           onChange={(e) => setNote(e.target.value)}
           rows={3}
           placeholder="e.g. capped by problem_evidence, but the proximity answer makes the lived claim credible — advancing anyway."
-          className="w-full bg-[#090D16] border border-[#1E293B] rounded p-2.5 text-xs font-sans text-[#F8FAFC] placeholder:text-[#475569] focus:outline-none focus:border-sky-500/60 resize-y"
+          className="w-full bg-canvas border border-line rounded p-2.5 text-xs font-sans text-ink placeholder:text-ink-4 focus:outline-none focus:border-indigo-400 resize-y"
         />
       </label>
 
@@ -150,13 +150,13 @@ export default function ReviewerActionBar({
           value={who}
           onChange={(e) => setWho(e.target.value)}
           placeholder="your name"
-          className="bg-[#090D16] border border-[#1E293B] rounded px-2.5 py-1.5 text-xs font-mono text-[#F8FAFC] placeholder:text-[#475569] focus:outline-none focus:border-sky-500/60"
+          className="bg-canvas border border-line rounded px-2.5 py-1.5 text-xs font-mono text-ink placeholder:text-ink-4 focus:outline-none focus:border-indigo-400"
         />
         <button
           type="button"
           disabled={pending}
           onClick={() => void onlyNote()}
-          className="px-3 py-1.5 rounded border border-[#334155] text-xs text-[#94A3B8] hover:bg-[#1E293B] disabled:opacity-50"
+          className="px-3 py-1.5 rounded border border-line-strong text-xs text-ink-2 hover:bg-muted disabled:opacity-50"
         >
           Save note only
         </button>
@@ -173,12 +173,12 @@ export default function ReviewerActionBar({
                 setStatus('Decision cleared.')
               }
             }}
-            className="px-3 py-1.5 rounded border border-[#334155] text-xs text-[#64748B] hover:bg-[#1E293B] disabled:opacity-50"
+            className="px-3 py-1.5 rounded border border-line-strong text-xs text-ink-3 hover:bg-muted disabled:opacity-50"
           >
             Clear decision
           </button>
         )}
-        {status && <span className="text-[11px] font-mono text-sky-300">{status}</span>}
+        {status && <span className="text-[11px] font-mono text-indigo-700">{status}</span>}
       </div>
     </div>
   )

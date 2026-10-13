@@ -104,7 +104,7 @@ function Bars({
   linkAs?: 'sector'
 }) {
   if (rows.length === 0) {
-    return <p className="text-[11px] text-[#64748B] font-mono px-1 py-2">{empty}</p>
+    return <p className="text-[11px] text-ink-3 font-mono px-1 py-2">{empty}</p>
   }
   const max = rows[0].count
   return (
@@ -112,18 +112,18 @@ function Bars({
       {rows.map(({ label, count: n, raw }) => {
         const row = (
           <div className="flex items-center gap-2">
-            <div className="w-[46%] shrink-0 truncate text-[11px] text-[#CBD5E1]" title={label}>
+            <div className="w-[46%] shrink-0 truncate text-[11px] text-ink-2" title={label}>
               {label}
             </div>
-            <div className="flex-1 h-2 rounded-full bg-[#090D16] overflow-hidden">
+            <div className="flex-1 h-2 rounded-full bg-canvas overflow-hidden">
               <div
-                className="h-full bg-sky-500/50"
+                className="h-full bg-brand rounded-full"
                 style={{ width: `${Math.max(3, Math.round((n / max) * 100))}%` }}
               />
             </div>
-            <div className="w-14 shrink-0 text-right text-[11px] font-mono text-[#F8FAFC]">
+            <div className="w-14 shrink-0 text-right text-[11px] font-mono text-ink">
               {n}
-              <span className="text-[#64748B]">
+              <span className="text-ink-3">
                 {' '}
                 {total > 0 ? `${Math.round((n / total) * 100)}%` : ''}
               </span>
@@ -135,7 +135,7 @@ function Bars({
             {linkAs === 'sector' ? (
               <a
                 href={`/candidates?sector=${encodeURIComponent(raw)}`}
-                className="block hover:bg-[#1E293B]/40 rounded px-1 py-0.5 -mx-1"
+                className="block hover:bg-muted rounded px-1 py-0.5 -mx-1"
               >
                 {row}
               </a>
@@ -168,13 +168,13 @@ export default async function CohortIntelligence() {
   const withNeed = records.filter((r) => r.constraintType).length
 
   return (
-    <div className="mb-4 grid grid-cols-1 lg:grid-cols-2 gap-2">
-      <section className="bg-[#0F172A] border border-[#1E293B] rounded-lg p-3">
+    <div className="mb-6 grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <section className="bg-surface border border-line rounded-card shadow-card p-6">
         <div className="flex items-baseline justify-between mb-2">
-          <h2 className="text-[11px] font-mono uppercase tracking-wide text-[#94A3B8]">
+          <h2 className="font-display text-lg font-semibold text-ink">
             What is being built
           </h2>
-          <span className="text-[10px] font-mono text-[#64748B]">
+          <span className="text-[10px] font-mono text-ink-3">
             {withSector} solutions · {distinctSectors} sectors
           </span>
         </div>
@@ -184,25 +184,25 @@ export default async function CohortIntelligence() {
           linkAs="sector"
           empty="No sectors yet — sector is derived during scoring, so run the pipeline first."
         />
-        <p className="mt-2 text-[10px] text-[#64748B] font-mono leading-relaxed">
+        <p className="mt-2 text-[10px] text-ink-3 font-mono leading-relaxed">
           Derived by the model from the founder&apos;s own description; intake never asks it. Treat
           as reviewable, not ground truth.
         </p>
       </section>
 
-      <section className="bg-[#0F172A] border border-[#1E293B] rounded-lg p-3">
+      <section className="bg-surface border border-line rounded-card shadow-card p-6">
         <div className="flex items-baseline justify-between mb-2">
-          <h2 className="text-[11px] font-mono uppercase tracking-wide text-[#94A3B8]">
+          <h2 className="font-display text-lg font-semibold text-ink">
             What founders are looking for
           </h2>
-          <span className="text-[10px] font-mono text-[#64748B]">{withNeed} answered</span>
+          <span className="text-[10px] font-mono text-ink-3">{withNeed} answered</span>
         </div>
         <Bars
           rows={needs}
           total={records.length}
           empty="No answers yet — this comes from the first question on each branch."
         />
-        <p className="mt-2 text-[10px] text-[#64748B] font-mono leading-relaxed">
+        <p className="mt-2 text-[10px] text-ink-3 font-mono leading-relaxed">
           Their own answer to &quot;what would help&quot;, captured at intake for everyone — scored
           or not. This is what the programme acts on, not what it ranks.
         </p>

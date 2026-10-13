@@ -1,19 +1,26 @@
 const BAND_STYLES: Record<string, string> = {
-  strong: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/40',
-  promising: 'bg-sky-500/15 text-sky-300 border-sky-500/40',
-  early: 'bg-amber-500/15 text-amber-300 border-amber-500/40',
-  unscored: 'bg-slate-500/15 text-slate-300 border-slate-500/40',
+  strong: 'bg-emerald-50 text-emerald-800 border-emerald-200',
+  promising: 'bg-sky-50 text-sky-800 border-sky-200',
+  early: 'bg-amber-50 text-amber-800 border-amber-200',
+  unscored: 'bg-slate-100 text-slate-700 border-slate-200',
+}
+
+const BAND_LABELS: Record<string, string> = {
+  strong: 'Strong',
+  promising: 'Promising',
+  early: 'Early',
+  unscored: 'Unscored',
 }
 
 export function BandChip({ band, title }: { band: string; title?: string }) {
   return (
     <span
       title={title}
-      className={`inline-flex items-center gap-1 px-2 py-0.5 rounded border text-[11px] font-mono font-semibold uppercase tracking-wide ${
+      className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full border text-xs font-semibold ${
         BAND_STYLES[band] ?? BAND_STYLES.unscored
       }`}
     >
-      {band}
+      {BAND_LABELS[band] ?? band}
     </span>
   )
 }
@@ -28,7 +35,7 @@ export function FitChip({ score, label }: { score: number | null; label: string 
     return (
       <span
         title={`${label}: not scored`}
-        className="inline-flex w-12 justify-center px-1.5 py-0.5 rounded border border-slate-700 bg-slate-800/50 text-slate-500 text-[11px] font-mono"
+        className="inline-flex w-11 justify-center py-0.5 rounded-md border border-slate-200 bg-slate-50 text-slate-400 text-xs font-mono"
       >
         —
       </span>
@@ -36,14 +43,14 @@ export function FitChip({ score, label }: { score: number | null; label: string 
   }
   const tone =
     score >= 72
-      ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/40'
+      ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
       : score >= 50
-        ? 'bg-sky-500/15 text-sky-300 border-sky-500/40'
-        : 'bg-amber-500/15 text-amber-300 border-amber-500/40'
+        ? 'bg-sky-50 text-sky-800 border-sky-200'
+        : 'bg-amber-50 text-amber-800 border-amber-200'
   return (
     <span
       title={`${label}: ${score}`}
-      className={`inline-flex w-12 justify-center px-1.5 py-0.5 rounded border text-[11px] font-mono font-semibold ${tone}`}
+      className={`inline-flex w-11 justify-center py-0.5 rounded-md border text-xs font-mono font-semibold ${tone}`}
     >
       {score}
     </span>
@@ -51,21 +58,20 @@ export function FitChip({ score, label }: { score: number | null; label: string 
 }
 
 const FLAG_TONES: Array<[RegExp, string]> = [
-  [/spam/, 'bg-rose-500/15 text-rose-300 border-rose-500/40'],
-  [/contradiction/, 'bg-orange-500/15 text-orange-300 border-orange-500/40'],
-  [/low_confidence|missing_evidence|thin_dossier/, 'bg-amber-500/15 text-amber-300 border-amber-500/40'],
-  [/laya_unavailable/, 'bg-slate-500/15 text-slate-300 border-slate-500/40'],
+  [/spam/, 'bg-rose-50 text-rose-800 border-rose-200'],
+  [/contradiction/, 'bg-accent-soft text-orange-800 border-orange-200'],
+  [/low_confidence|missing_evidence|thin_dossier/, 'bg-amber-50 text-amber-800 border-amber-200'],
+  [/laya_unavailable/, 'bg-slate-100 text-slate-700 border-slate-200'],
 ]
 
 export function FlagChip({ flag }: { flag: string }) {
   const tone =
-    FLAG_TONES.find(([re]) => re.test(flag))?.[1] ??
-    'bg-slate-500/15 text-slate-300 border-slate-500/40'
-  const short = flag.split(':')[0]
+    FLAG_TONES.find(([re]) => re.test(flag))?.[1] ?? 'bg-slate-100 text-slate-700 border-slate-200'
+  const short = flag.split(':')[0].replace(/_/g, ' ')
   return (
     <span
       title={flag}
-      className={`inline-flex items-center px-1.5 py-0.5 rounded border text-[10px] font-mono ${tone}`}
+      className={`inline-flex items-center px-2 py-0.5 rounded-full border text-[11px] font-medium ${tone}`}
     >
       {short}
     </span>

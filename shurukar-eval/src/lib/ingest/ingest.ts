@@ -2,6 +2,13 @@ import { prisma } from '../db'
 import type { Candidate } from '@prisma/client'
 import { assertAllMapped, extractMeta, normalizeRecord } from './fieldMap'
 import { seedBankFromAnswers, upsertSeedBankRecord } from '../seedbank'
+import {
+  detectLanguage,
+  normalizeAnswerValues,
+  personaSlug,
+  stageSlug,
+  titleCase,
+} from './normalizeValues'
 
 /**
  * Stage 1 — ingest.
@@ -36,19 +43,30 @@ export async function ingestCandidate(
 ): Promise<IngestResult> {
   assertAllMapped(Object.keys(rawRecord))
 
-  const answers = normalizeRecord(rawRecord)
+  const answers = normalizeAnswerValues(normalizeRecord(rawRecord))
   const meta = extractMeta(rawRecord)
   const externalId = opts.externalId || deriveExternalId(answers, meta, index)
 
+  // "I started something before, it is closed now" is the founder telling us
+  // exactly this; carry it to the field the distiller already reads.
+  if (!answers.prior_venture_closed && personaSlug(answers.persona) === 'prior_founder') {
+    answers.prior_venture_closed = 'yes — started something before, it is closed now'
+  }
+
   const consentRaw = (meta.consent_at || '').trim()
   const consentAt = consentRaw ? new Date(consentRaw) : null
+  const pin = answers.pin_code?.trim()
 
   const profile = {
-    district: answers.district?.trim() || 'Unknown',
-    block: answers.block?.trim() || 'Unknown',
-    persona: answers.persona?.trim() || 'other',
-    declaredStage: answers.declared_stage?.trim() || 'idea',
-    language: (meta.language || 'unknown').trim().toLowerCase() || 'unknown',
+    state: titleCase(answers.state) || 'Unknown',
+    district: titleCase(answers.district) || 'Unknown',
+    // The registration form asks a PIN code, not a block; it is the nearest
+    // locality the export carries.
+    block: answers.block?.trim() || (pin ? `PIN ${pin}` : 'Unknown'),
+    persona: personaSlug(answers.persona),
+    declaredStage: stageSlug(answers.declared_stage),
+    language:
+      (meta.language || '').trim().toLowerCase() || detectLanguage(answers),
     consentAt: consentAt && !Number.isNaN(consentAt.getTime()) ? consentAt : null,
   }
 

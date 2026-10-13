@@ -37,13 +37,17 @@ services:
       CONFIDENCE_FLOOR: ${CONFIDENCE_FLOOR:-}
       THIN_DOSSIER_TOKENS: ${THIN_DOSSIER_TOKENS:-}
       QUESTION_SET_VERSION: ${QUESTION_SET_VERSION:-}
+      # Reviewer sign-in (see src/middleware.ts). Required in production.
+      AUTH_USERNAME: ${AUTH_USERNAME:-}
+      AUTH_PASSWORD: ${AUTH_PASSWORD:-}
+      AUTH_SECRET: ${AUTH_SECRET:-}
     ports:
       - '${PORT:-3000}:3000'
     healthcheck:
       test:
         - CMD-SHELL
         - >-
-          node -e "fetch('http://127.0.0.1:3000/candidates')
+          node -e "fetch('http://127.0.0.1:3000/api/health')
           .then(r => process.exit(r.ok ? 0 : 1))
           .catch(() => process.exit(1))"
       interval: 30s

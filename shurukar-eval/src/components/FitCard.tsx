@@ -28,7 +28,7 @@ function Distribution({ probabilities, chosen }: { probabilities: Record<string,
   const entries = Object.entries(probabilities).sort((a, b) => b[1] - a[1])
   if (entries.length === 0) {
     return (
-      <p className="text-[10px] text-[#64748B] italic mt-1.5">
+      <p className="text-[10px] text-ink-3 italic mt-1.5">
         No distribution returned for this answer.
       </p>
     )
@@ -42,18 +42,18 @@ function Distribution({ probabilities, chosen }: { probabilities: Record<string,
           <div key={label} className="flex items-center gap-2">
             <span
               className={`w-36 shrink-0 text-[10px] font-mono truncate ${
-                isChosen ? 'text-sky-300 font-semibold' : 'text-[#64748B]'
+                isChosen ? 'text-indigo-700 font-semibold' : 'text-ink-3'
               }`}
             >
               {label}
             </span>
-            <div className="flex-1 h-1.5 bg-[#1E293B] rounded overflow-hidden">
+            <div className="flex-1 h-1.5 bg-muted rounded overflow-hidden">
               <div
-                className={`h-full rounded ${isChosen ? 'bg-sky-400' : 'bg-slate-600'}`}
+                className={`h-full rounded ${isChosen ? 'bg-indigo-400' : 'bg-slate-300'}`}
                 style={{ width: `${pct}%` }}
               />
             </div>
-            <span className="w-10 shrink-0 text-right text-[10px] font-mono text-[#64748B]">
+            <span className="w-10 shrink-0 text-right text-[10px] font-mono text-ink-3">
               {pct.toFixed(0)}%
             </span>
           </div>
@@ -68,33 +68,33 @@ export default function FitCard({ title, score, floor, questions, missing, cappe
 
   return (
     <div
-      className={`bg-[#0F172A] border rounded-lg overflow-hidden ${
-        cappedHere ? 'border-amber-500/40' : 'border-[#1E293B]'
+      className={`bg-surface border rounded-lg overflow-hidden ${
+        cappedHere ? 'border-amber-500/40' : 'border-line'
       }`}
     >
       <button
         onClick={() => setIsOpen((v) => !v)}
-        className="w-full flex items-center justify-between gap-3 p-4 text-left hover:bg-[#111827] transition-colors"
+        className="w-full flex items-center justify-between gap-3 p-4 text-left hover:bg-surface-2 transition-colors"
       >
         <div className="flex items-center gap-3 min-w-0">
-          <span className="text-[#64748B] font-mono text-xs">{isOpen ? '▾' : '▸'}</span>
+          <span className="text-ink-3 font-mono text-xs">{isOpen ? '▾' : '▸'}</span>
           <span className="font-semibold text-sm truncate">{title}</span>
-          <span className="text-[10px] font-mono text-[#64748B]">
+          <span className="text-[10px] font-mono text-ink-3">
             {questions.length} question{questions.length === 1 ? '' : 's'}
           </span>
         </div>
         <div className="flex items-center gap-2 shrink-0">
           {score !== null && score < floor && (
-            <span className="text-[10px] font-mono text-amber-300">below floor {floor}</span>
+            <span className="text-[10px] font-mono text-amber-700">below floor {floor}</span>
           )}
           <FitChip score={score} label={title} />
         </div>
       </button>
 
       {isOpen && (
-        <div className="border-t border-[#1E293B] p-4 bg-[#090D16]/60 flex flex-col gap-3">
+        <div className="border-t border-line p-4 bg-canvas flex flex-col gap-3">
           {questions.length === 0 ? (
-            <p className="text-xs text-[#64748B] italic">
+            <p className="text-xs text-ink-3 italic">
               No answers recorded for this fit — the model was not reached.
             </p>
           ) : (
@@ -103,17 +103,17 @@ export default function FitCard({ title, score, floor, questions, missing, cappe
                 key={q.key}
                 className={`p-3 rounded-lg border text-xs ${
                   q.missing
-                    ? 'bg-[#111827]/60 border-dashed border-[#334155]'
-                    : 'bg-[#111827] border-[#1E293B]'
+                    ? 'bg-surface-2 border-dashed border-line-strong'
+                    : 'bg-surface-2 border-line'
                 }`}
               >
                 <div className="flex items-center justify-between gap-2 mb-1">
-                  <span className="text-sky-300 font-mono font-semibold">{q.key}</span>
+                  <span className="text-indigo-700 font-mono font-semibold">{q.key}</span>
                   <div className="flex items-center gap-1.5 shrink-0">
                     {q.weight < 1 && (
                       <span
                         title={`Weighted ${q.weight} inside this fit`}
-                        className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-[#1E293B] text-[#64748B]"
+                        className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-muted text-ink-3"
                       >
                         ×{q.weight}
                       </span>
@@ -121,8 +121,8 @@ export default function FitCard({ title, score, floor, questions, missing, cappe
                     <span
                       className={`text-[10px] font-mono px-1.5 py-0.5 rounded ${
                         q.confidence !== null && q.confidence < 0.5
-                          ? 'bg-amber-500/15 text-amber-300'
-                          : 'bg-[#1E293B] text-[#94A3B8]'
+                          ? 'bg-amber-500/15 text-amber-700'
+                          : 'bg-muted text-ink-2'
                       }`}
                     >
                       conf {q.confidence === null ? '—' : q.confidence.toFixed(2)}
@@ -131,19 +131,19 @@ export default function FitCard({ title, score, floor, questions, missing, cappe
                 </div>
 
                 <div className="flex flex-wrap items-baseline gap-2">
-                  <span className="text-[#64748B]">label</span>
+                  <span className="text-ink-3">label</span>
                   <span
                     className={`font-mono font-semibold px-2 py-0.5 rounded border ${
                       q.missing
-                        ? 'bg-[#1E293B]/60 border-[#334155] text-[#94A3B8]'
-                        : 'bg-[#1E293B]/80 border-[#334155]/40 text-white'
+                        ? 'bg-muted border-line-strong text-ink-2'
+                        : 'bg-muted border-line-strong text-ink'
                     }`}
                   >
                     {q.label ?? 'no answer'}
                   </span>
-                  {q.phrase && <span className="text-[#94A3B8]">— {q.phrase}</span>}
+                  {q.phrase && <span className="text-ink-2">— {q.phrase}</span>}
                   {q.missing && (
-                    <span className="text-[10px] text-amber-300/80">
+                    <span className="text-[10px] text-amber-700">
                       excluded from the score, not counted against the founder
                     </span>
                   )}
@@ -155,7 +155,7 @@ export default function FitCard({ title, score, floor, questions, missing, cappe
           )}
 
           {missing.length > 0 && (
-            <p className="text-[11px] text-[#64748B] border-t border-[#1E293B] pt-3">
+            <p className="text-[11px] text-ink-3 border-t border-line pt-3">
               Not established here: <span className="font-mono">{missing.join(', ')}</span>. Missing
               evidence lowers confidence and routes to a reviewer — it never lowers the band.
             </p>

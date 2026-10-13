@@ -11,6 +11,7 @@ import { BANDS, FIT_LABELS, type Band, type Fit } from './assemble/labels'
  */
 
 export interface Filters {
+  state?: string
   district?: string
   block?: string
   q?: string
@@ -49,9 +50,20 @@ export const PERSONAS = [
   { value: 'farmer', label: 'Farmer' },
   { value: 'micro_entrepreneur', label: 'Micro-entrepreneur' },
   { value: 'professional', label: 'Professional' },
-  { value: 'homemaker', label: 'Homemaker' },
+  { value: 'family_business', label: 'Family business' },
+  { value: 'prior_founder', label: 'Started before (closed)' },
+  { value: 'homemaker', label: 'Homemaker / SHG' },
   { value: 'other', label: 'Other' },
 ]
+
+/** Reviewer-facing words for the stored slugs; an unknown slug shows as-is. */
+export function personaLabel(slug: string): string {
+  return PERSONAS.find((p) => p.value === slug)?.label ?? slug.replace(/_/g, ' ')
+}
+
+export function stageLabel(slug: string): string {
+  return STAGES.find((s) => s.value === slug)?.label ?? slug.replace(/_/g, ' ')
+}
 
 export const REVIEWER_STATUSES = [
   { value: 'unreviewed', label: 'Unreviewed' },
@@ -103,6 +115,7 @@ export function parseFilters(params: Record<string, string | string[] | undefine
     return s && s !== '' ? s : undefined
   }
   return {
+    state: one('state'),
     district: one('district'),
     block: one('block'),
     q: one('q'),
@@ -138,6 +151,7 @@ export function toSearchParams(filters: Filters): URLSearchParams {
     if (value === undefined || value === null || value === '' || value === false) return
     params.set(key, String(value))
   }
+  set('state', filters.state)
   set('district', filters.district)
   set('sector', filters.sector)
   set('block', filters.block)
@@ -183,6 +197,7 @@ export function buildCandidateWhere(filters: Filters): Prisma.CandidateWhereInpu
   const where: Prisma.CandidateWhereInput = {}
   const and: Prisma.CandidateWhereInput[] = []
 
+  if (filters.state) where.state = filters.state
   if (filters.district) where.district = filters.district
   if (filters.block) where.block = filters.block
   if (filters.stage) where.declaredStage = filters.stage
@@ -195,6 +210,8 @@ export function buildCandidateWhere(filters: Filters): Prisma.CandidateWhereInpu
     and.push({
       OR: [
         { externalId: { contains: filters.q } },
+        { responses: { some: { fieldId: 'name', value: { contains: filters.q } } } },
+        { state: { contains: filters.q } },
         { district: { contains: filters.q } },
         { block: { contains: filters.q } },
       ],
@@ -305,12 +322,14 @@ export function isAssessmentSort(sort: string | undefined): boolean {
 export interface CandidateRow {
   id: string
   externalId: string
+  state: string
   district: string
   block: string
   persona: string
   declaredStage: string
   language: string
   createdAt: Date
+  responses?: Array<{ value: string }>
   assessments: Array<{
     band: string
     scenario: string | null
@@ -360,7 +379,16 @@ export const CANDIDATE_INCLUDE = {
     take: 1,
   },
   seedBank: true,
+  // The founder's name, for reviewers. It never reaches Laya: the distiller
+  // drops it before the dossier is built.
+  responses: { where: { fieldId: 'name' }, select: { value: true }, take: 1 },
 } satisfies Prisma.CandidateInclude
+
+/** The founder's name as they typed it, or null when the export had none. */
+export function candidateName(row: { responses?: Array<{ value: string }> }): string | null {
+  const v = row.responses?.[0]?.value?.trim()
+  return v ? v : null
+}
 
 /**
  * Within-band rank, over the candidates the current filter selects.
@@ -409,6 +437,8 @@ export async function withinBandRanks(
 
 const CSV_COLUMNS = [
   'external_id',
+  'name',
+  'state',
   'district',
   'block',
   'persona',
@@ -453,6 +483,8 @@ export function toCsv(rows: CandidateRow[]): string {
     lines.push(
       [
         row.externalId,
+        candidateName(row),
+        row.state,
         row.district,
         row.block,
         row.persona,

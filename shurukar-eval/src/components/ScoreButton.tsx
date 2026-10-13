@@ -93,12 +93,12 @@ export default function ScoreButton({ initial }: { initial: ScoreCounts }) {
     'rounded px-2.5 py-1.5 text-[11px] font-mono border transition-colors disabled:opacity-40 disabled:cursor-not-allowed'
 
   return (
-    <div className="mb-4 bg-[#0F172A] border border-[#1E293B] rounded-lg p-2.5 flex flex-wrap items-center gap-2">
+    <div className="mb-6 bg-surface border border-line rounded-card shadow-card p-4 flex flex-wrap items-center gap-2">
       <button
         type="button"
         disabled={busy || counts.pending === 0}
         onClick={() => void run('pending')}
-        className={`${btn} border-sky-500/40 text-sky-200 hover:border-sky-400 hover:bg-sky-500/10`}
+        className={`${btn} border-indigo-500/40 text-indigo-800 hover:border-indigo-500 hover:bg-indigo-500/10`}
         title={
           counts.pending === 0
             ? 'Every candidate has been scored against the current question set.'
@@ -116,24 +116,24 @@ export default function ScoreButton({ initial }: { initial: ScoreCounts }) {
         type="button"
         disabled={busy}
         onClick={() => void run('all')}
-        className={`${btn} border-[#334155] text-[#CBD5E1] hover:border-[#475569] hover:bg-[#1E293B]`}
+        className={`${btn} border-line-strong text-ink-2 hover:border-ink-4 hover:bg-muted`}
         title="Re-runs every candidate, including the ones a rerun cannot change."
       >
         {running === 'all' ? `re-scoring ${counts.total}…` : `re-score all ${counts.total}`}
       </button>
 
       {busy && (
-        <span className="text-[11px] font-mono text-sky-300/90">
+        <span className="text-[11px] font-mono text-indigo-700">
           {elapsed}s elapsed
-          {expected > 0 && <span className="text-[#64748B]"> · roughly {expected}s expected</span>}
-          <span className="text-[#64748B]"> · leave this tab open</span>
+          {expected > 0 && <span className="text-ink-3"> · roughly {expected}s expected</span>}
+          <span className="text-ink-3"> · leave this tab open</span>
         </span>
       )}
 
       {!busy && counts.unscoreable > 0 && (
         <Link
           href="/candidates?unscored=true"
-          className="text-[11px] font-mono text-amber-400/90 hover:text-amber-300 underline decoration-dotted"
+          className="text-[11px] font-mono text-amber-700 hover:text-amber-800 underline decoration-dotted"
           title="Spam, a dossier too thin to band, or an answer too close to chance. Another run cannot change these."
         >
           {counts.unscoreable} need a human, not another run
@@ -141,34 +141,34 @@ export default function ScoreButton({ initial }: { initial: ScoreCounts }) {
       )}
 
       {!busy && counts.stale > 0 && (
-        <span className="text-[11px] font-mono text-amber-400/90">
+        <span className="text-[11px] font-mono text-amber-700">
           {counts.stale} on an older question set — not comparable until re-scored
         </span>
       )}
 
       {!busy && !counts.layaConfigured && (
-        <span className="text-[11px] font-mono text-amber-400/90">
+        <span className="text-[11px] font-mono text-amber-700">
           LAYA_API_KEY is not set — everything lands unscored, which is the correct state
         </span>
       )}
 
       {!busy && result && (
-        <span className="text-[11px] font-mono text-[#94A3B8]">
+        <span className="text-[11px] font-mono text-ink-2">
           {result.error ? (
-            <span className="text-rose-400">failed: {result.error}</span>
+            <span className="text-rose-700">failed: {result.error}</span>
           ) : result.requested === 0 ? (
             'nothing was waiting'
           ) : (
             <>
               scored {result.scored}
               {result.stillUnscored > 0 && (
-                <span className="text-[#64748B]">
+                <span className="text-ink-3">
                   {' '}
                   · {result.stillUnscored} could not be banded
                 </span>
               )}
               {typeof result.elapsedMs === 'number' && (
-                <span className="text-[#64748B]"> · {Math.round(result.elapsedMs / 1000)}s</span>
+                <span className="text-ink-3"> · {Math.round(result.elapsedMs / 1000)}s</span>
               )}
             </>
           )}

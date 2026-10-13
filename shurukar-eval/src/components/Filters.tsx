@@ -13,6 +13,7 @@ import {
 } from '@/lib/query'
 
 interface Props {
+  states: string[]
   districts: string[]
   blocks: string[]
   languages: string[]
@@ -21,13 +22,13 @@ interface Props {
 }
 
 const selectClass =
-  'bg-[#090D16] border border-[#1E293B] rounded px-2 py-1.5 text-[11px] font-mono text-[#F8FAFC] focus:outline-none focus:border-sky-500/60'
+  'bg-canvas border border-line rounded px-2 py-1.5 text-[11px] font-mono text-ink focus:outline-none focus:border-indigo-400'
 
 /**
  * Every filter is reflected in the URL, so a filtered view is shareable and the
  * CSV export of that view returns exactly the same rows.
  */
-export default function Filters({ districts, blocks, languages, questionSetVersions, total }: Props) {
+export default function Filters({ states, districts, blocks, languages, questionSetVersions, total }: Props) {
   const router = useRouter()
   const searchParams = useSearchParams()
   const searchRef = useRef<HTMLInputElement>(null)
@@ -93,15 +94,29 @@ export default function Filters({ districts, blocks, languages, questionSetVersi
   const exportHref = `/api/export?${searchParams.toString()}`
 
   return (
-    <div className="mb-4 bg-[#0F172A] border border-[#1E293B] rounded-lg p-2.5 flex flex-col gap-2">
+    <div className="mb-6 bg-surface border border-line rounded-card shadow-card p-4 flex flex-col gap-2">
       <form onSubmit={onSubmit} className="flex flex-wrap items-center gap-2">
         <input
           ref={searchRef}
           name="q"
           defaultValue={get('q')}
-          placeholder="search id, district or block   /"
-          className="flex-1 min-w-[200px] bg-[#090D16] border border-[#1E293B] rounded px-2.5 py-1.5 text-[11px] font-mono text-[#F8FAFC] placeholder:text-[#475569] focus:outline-none focus:border-sky-500/60"
+          placeholder="search name, id, state, district or block   /"
+          className="flex-1 min-w-[200px] bg-canvas border border-line rounded px-2.5 py-1.5 text-[11px] font-mono text-ink placeholder:text-ink-4 focus:outline-none focus:border-indigo-400"
         />
+
+        <select
+          aria-label="State"
+          value={get('state')}
+          onChange={(e) => push({ state: e.target.value })}
+          className={selectClass}
+        >
+          <option value="">state · all</option>
+          {states.map((s) => (
+            <option key={s} value={s}>
+              {s}
+            </option>
+          ))}
+        </select>
 
         <select
           aria-label="District"
@@ -267,7 +282,7 @@ export default function Filters({ districts, blocks, languages, questionSetVersi
           type="button"
           onClick={() => push({ unscored: get('unscored') === 'true' ? null : 'true', band: null })}
           data-active={get('unscored') === 'true'}
-          className="px-2 py-1 rounded border border-slate-500/50 text-slate-300 hover:bg-slate-500/10 data-[active=true]:bg-slate-500/25 data-[active=true]:text-white"
+          className="px-2 py-1 rounded border border-slate-500/50 text-slate-700 hover:bg-slate-500/10 data-[active=true]:bg-slate-500/25 data-[active=true]:text-ink"
         >
           unscored only
         </button>
@@ -275,7 +290,7 @@ export default function Filters({ districts, blocks, languages, questionSetVersi
           type="button"
           onClick={() => push({ needsHuman: get('needsHuman') === 'true' ? null : 'true' })}
           data-active={get('needsHuman') === 'true'}
-          className="px-2 py-1 rounded border border-sky-500/50 text-sky-300 hover:bg-sky-500/10 data-[active=true]:bg-sky-500/25"
+          className="px-2 py-1 rounded border border-indigo-500/50 text-indigo-700 hover:bg-indigo-500/10 data-[active=true]:bg-indigo-500/25"
         >
           needs a human
         </button>
@@ -283,34 +298,34 @@ export default function Filters({ districts, blocks, languages, questionSetVersi
           type="button"
           onClick={() => push({ hasFlags: get('hasFlags') === 'true' ? null : 'true', flagType: null })}
           data-active={get('hasFlags') === 'true'}
-          className="px-2 py-1 rounded border border-amber-500/50 text-amber-300 hover:bg-amber-500/10 data-[active=true]:bg-amber-500/25"
+          className="px-2 py-1 rounded border border-amber-500/50 text-amber-700 hover:bg-amber-500/10 data-[active=true]:bg-amber-500/25"
         >
           has flags
         </button>
         <button
           type="button"
           onClick={() => setShowScores((v) => !v)}
-          className="px-2 py-1 rounded border border-[#334155] text-[#94A3B8] hover:bg-[#1E293B]"
+          className="px-2 py-1 rounded border border-line-strong text-ink-2 hover:bg-muted"
         >
           {showScores ? 'hide' : 'show'} fit thresholds
         </button>
 
         <span className="ml-auto flex items-center gap-2">
-          <span className="text-[#64748B]">
+          <span className="text-ink-3">
             {activeCount} filter{activeCount === 1 ? '' : 's'} · {total} rows
           </span>
           {activeCount > 0 && (
             <button
               type="button"
               onClick={() => router.push('/candidates')}
-              className="px-2 py-1 rounded border border-[#334155] text-[#64748B] hover:bg-[#1E293B]"
+              className="px-2 py-1 rounded border border-line-strong text-ink-3 hover:bg-muted"
             >
               reset
             </button>
           )}
           <a
             href={exportHref}
-            className="px-2 py-1 rounded border border-sky-500/50 text-sky-300 hover:bg-sky-500/10"
+            className="px-2 py-1 rounded border border-indigo-500/50 text-indigo-700 hover:bg-indigo-500/10"
           >
             export this view ↓
           </a>
@@ -320,7 +335,7 @@ export default function Filters({ districts, blocks, languages, questionSetVersi
       {showScores && (
         <form
           onSubmit={onSubmit}
-          className="flex flex-wrap items-end gap-3 border-t border-[#1E293B] pt-2.5 text-[11px] font-mono"
+          className="flex flex-wrap items-end gap-3 border-t border-line pt-2.5 text-[11px] font-mono"
         >
           {[
             { prefix: 'fp', label: 'Founder–Problem' },
@@ -328,7 +343,7 @@ export default function Filters({ districts, blocks, languages, questionSetVersi
             { prefix: 'sm', label: 'Solution–Market' },
           ].map(({ prefix, label }) => (
             <div key={prefix} className="flex flex-col gap-1">
-              <span className="text-[#64748B]">{label}</span>
+              <span className="text-ink-3">{label}</span>
               <div className="flex items-center gap-1">
                 <input
                   name={`${prefix}Min`}
@@ -337,9 +352,9 @@ export default function Filters({ districts, blocks, languages, questionSetVersi
                   max={100}
                   defaultValue={get(`${prefix}Min`)}
                   placeholder="min"
-                  className="w-16 bg-[#090D16] border border-[#1E293B] rounded px-1.5 py-1 text-[#F8FAFC] placeholder:text-[#475569] focus:outline-none focus:border-sky-500/60"
+                  className="w-16 bg-canvas border border-line rounded px-1.5 py-1 text-ink placeholder:text-ink-4 focus:outline-none focus:border-indigo-400"
                 />
-                <span className="text-[#475569]">–</span>
+                <span className="text-ink-4">–</span>
                 <input
                   name={`${prefix}Max`}
                   type="number"
@@ -347,13 +362,13 @@ export default function Filters({ districts, blocks, languages, questionSetVersi
                   max={100}
                   defaultValue={get(`${prefix}Max`)}
                   placeholder="max"
-                  className="w-16 bg-[#090D16] border border-[#1E293B] rounded px-1.5 py-1 text-[#F8FAFC] placeholder:text-[#475569] focus:outline-none focus:border-sky-500/60"
+                  className="w-16 bg-canvas border border-line rounded px-1.5 py-1 text-ink placeholder:text-ink-4 focus:outline-none focus:border-indigo-400"
                 />
               </div>
             </div>
           ))}
           <div className="flex flex-col gap-1">
-            <span className="text-[#64748B]">Confidence ≥</span>
+            <span className="text-ink-3">Confidence ≥</span>
             <input
               name="confidenceMin"
               type="number"
@@ -362,13 +377,13 @@ export default function Filters({ districts, blocks, languages, questionSetVersi
               max={1}
               defaultValue={get('confidenceMin')}
               placeholder="0.00"
-              className="w-20 bg-[#090D16] border border-[#1E293B] rounded px-1.5 py-1 text-[#F8FAFC] placeholder:text-[#475569] focus:outline-none focus:border-sky-500/60"
+              className="w-20 bg-canvas border border-line rounded px-1.5 py-1 text-ink placeholder:text-ink-4 focus:outline-none focus:border-indigo-400"
             />
           </div>
           <input type="hidden" name="q" value={get('q')} />
           <button
             type="submit"
-            className="px-2.5 py-1.5 rounded border border-sky-500/50 text-sky-300 hover:bg-sky-500/10"
+            className="px-2.5 py-1.5 rounded border border-indigo-500/50 text-indigo-700 hover:bg-indigo-500/10"
           >
             apply
           </button>

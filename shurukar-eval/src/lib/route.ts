@@ -9,7 +9,7 @@ export interface Routing {
   flags: string[]
 }
 
-const ZERO = /^(0|none|zero|nil|no|koi nahi|कोई नहीं|-|na|n\/a)$/i
+const ZERO = /^(0|none|zero|nil|no|koi nahi|कोई नहीं|-|na|n\/a|none yet|nobody yet|nothing yet|no one yet)$/i
 const VERY_FEW = /^(1-5|1 to 5|1 - 5|1–5|one to five)$/i
 
 function isZero(value: string | undefined): boolean {

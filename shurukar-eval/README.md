@@ -47,6 +47,75 @@ LAYA_API_KEY=test LAYA_BASE_URL=http://localhost:4555 npm run score
 LAYA_API_KEY=test LAYA_BASE_URL=http://localhost:4555 npm run acceptance
 ```
 
+## The ShuruKar registration export
+
+The live form's CSV (`Q1. <Hindi> · <English>` headers) maps through the same
+field map: headers are keyed on their English half, so a renumbered question
+still maps. The form branches on Q12 — idea founders answer Q13-18, built
+Q19-27, in-market Q28-36 — and the branch columns that share a field never
+overwrite an answered one with an empty one.
+
+| Form | Field | Note |
+|---|---|---|
+| Q1 state, Q3 PIN | `state`, `pin_code` | PIN stands in for block, which the form does not ask |
+| Q4 | `persona` | slugged: student, micro_entrepreneur, professional, family_business, prior_founder, homemaker |
+| Q12 | `declared_stage` | picks question set A / B / C |
+| Q13 / Q19 / Q28 "what would help" | `constraint` | |
+| Q18 "what would help bring this idea to market" | `market_need` | a need, not a channel — kept out of `route_to_market` |
+| Q27 / Q36 "help reach customers" | `access_route` | channel options |
+| Q35 competitors | `alternatives_today` | |
+| Q20 / Q29 photos, Q38 deck | `media_links`, `pitch_document` | stored, never sent — Laya reads text only |
+| Phone, email | — | never stored |
+
+Option answers keep only their English half (the form's own label). Language
+is read off the founder's free text, since the form records none.
+
+```bash
+npm run ingest -- path/to/shurukar-registrations.csv --exclude-state KARNATAKA
+npm run score:batches -- --batch 10        # resumable; re-run to continue
+```
+
+`score:batches` persists every batch before starting the next, logs to
+`scoring-log.jsonl`, and stops on a rejected key or two dead batches in a row.
+Re-running it scores only what is still pending: never assessed, assessed under
+an older question set, or a run that never reached Laya. A run Laya answered
+but could not band is not retried — another run returns the same answer.
+
+## Going live
+
+1. **Score locally, then move the database** — no second pass through Laya:
+
+   ```bash
+   npm run snapshot:export -- snapshots/cohort.json      # gitignored: holds names and answers
+   docker compose up -d
+   docker compose cp snapshots/cohort.json app:/app/cohort.json
+   docker compose exec app node dist/scripts/importSnapshot.js cohort.json
+   ```
+
+2. **Set `AUTH_USERNAME`, `AUTH_PASSWORD` and `AUTH_SECRET`.** Every page shows
+   founders' names and answers and the export hands out the cohort, so
+   reviewers sign in at `/login` (a signed, http-only session cookie, seven
+   days). A production server with any of the three unset refuses every
+   request rather than opening up; only `next dev` runs open without them.
+   `/api/health` stays open for the healthcheck.
+
+### On Vercel with Neon
+
+The cohort lives in Neon Postgres, loaded from the snapshot with no second pass
+through Laya:
+
+```bash
+# once: create the tables and load the scored cohort (direct, non-pooled URL)
+DATABASE_URL="$DATABASE_URL_UNPOOLED" npx prisma db push
+DATABASE_URL="$DATABASE_URL_UNPOOLED" npm run snapshot:import -- snapshots/cohort.json
+```
+
+In the Vercel project: **Root Directory** `shurukar-eval`, and these environment
+variables — `DATABASE_URL` (Neon *pooled* URL), `AUTH_USERNAME`, `AUTH_PASSWORD`,
+`AUTH_SECRET`, plus `LAYA_API_KEY` / `LAYA_BASE_URL` only if anyone should be
+able to re-score from the page. `prebuild` sets the Prisma provider from
+`DATABASE_URL` and generates the client, so no build settings change.
+
 ## Deploying with Docker
 
 ```bash
@@ -78,6 +147,7 @@ and `.gitignore` already excludes it.
 | Variable | |
 |---|---|
 | `POSTGRES_PASSWORD` | required; compose fails loudly without it |
+| `AUTH_USERNAME`, `AUTH_PASSWORD`, `AUTH_SECRET` | required in production — see Going live |
 | `LAYA_API_KEY` | your AutoExtract key (`bpl_...`). Server-side only — it is never sent to client code. **Leaving it empty is supported**: the pipeline runs end to end and every candidate lands `unscored`, visible in the UI and still in the human queue. |
 | `LAYA_BASE_URL` | defaults to `https://autoextract.theboringpeople.in/api/laya` |
 | `OPENROUTER_API_KEY` | read by nothing yet — see below |

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import { questionSetVersion } from '@/lib/laya/questionSets'
+import { pendingCandidateIds, unscoreableCount } from '@/lib/pending'
 import { runPipelineForCohort } from '@/lib/pipeline'
 
 /**
@@ -16,7 +17,9 @@ import { runPipelineForCohort } from '@/lib/pipeline'
  * Long-running by nature: Laya takes roughly half a second to a second per
  * question per candidate, so a cohort of 50 is minutes, not seconds.
  */
-export const maxDuration = 600
+// Vercel caps a function at 300s; a run that long is a few dozen candidates.
+// Bigger cohorts go through `npm run score:batches`, not the page.
+export const maxDuration = 300
 export const dynamic = 'force-dynamic'
 
 type Scope = 'pending' | 'stale' | 'all'
@@ -39,6 +42,8 @@ async function candidateIdsFor(scope: Scope): Promise<string[]> {
     const all = await prisma.candidate.findMany({ select: { id: true } })
     return all.map((c) => c.id)
   }
+  // Includes runs that never reached Laya (timeout, outage): those are retryable.
+  if (scope === 'pending') return pendingCandidateIds()
 
   const version = questionSetVersion()
   const candidates = await prisma.candidate.findMany({
@@ -56,21 +61,9 @@ async function candidateIdsFor(scope: Scope): Promise<string[]> {
     .filter((c) => {
       const latest = c.assessments[0]
       if (!latest) return true
-      const stale = latest.questionSetVersion !== version
-      if (scope === 'stale') return stale
-      return stale
+      return latest.questionSetVersion !== version
     })
     .map((c) => c.id)
-}
-
-/**
- * Ran under the current question set and still could not be banded. Counted
- * separately so the UI never offers a button that cannot change them.
- */
-async function unscoreableCount(): Promise<number> {
-  return prisma.assessment.count({
-    where: { isLatest: true, band: 'unscored', questionSetVersion: questionSetVersion() },
-  })
 }
 
 export async function GET() {

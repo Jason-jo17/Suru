@@ -49,3 +49,10 @@ prisma/*.db-journal
 
 # bundled CLI output
 dist
+
+# batch scoring progress logs
+scoring-log.jsonl
+scoring-run.log
+
+# database snapshots carry founders' names and answers
+/snapshots

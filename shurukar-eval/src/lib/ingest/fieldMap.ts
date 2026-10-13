@@ -39,6 +39,12 @@ export const FIELD_IDS = [
   'monthly_income',
   'retention_signal',
   'time_commitment',
+  // Added for the ShuruKar registration export (Q-numbered, bilingual headers).
+  'state',
+  'pin_code',
+  'market_need',
+  'media_links',
+  'pitch_document',
 ] as const
 
 export type FieldId = (typeof FIELD_IDS)[number]
@@ -53,6 +59,13 @@ export const META_COLUMNS = new Set([
   'consent_at',
   'timestamp',
   '_expected',
+  // Contact details and form bookkeeping. Mapped so the import does not stop on
+  // them, and never stored: nothing about reaching a founder belongs beside
+  // their answers.
+  'contact_phone',
+  'contact_email',
+  'form_status',
+  'started_at',
 ])
 
 /**
@@ -60,11 +73,15 @@ export const META_COLUMNS = new Set([
  * stray whitespace, casing and terminal punctuation do not break a mapping.
  */
 export function normalizeHeader(header: string): string {
-  return header
-    .replace(/[​-‍﻿]/g, '')
-    .replace(/\s+/g, ' ')
-    .trim()
-    .replace(/[*?？।:]+$/u, '')
+  let h = header.replace(/[​-‍﻿]/g, '').replace(/\s+/g, ' ').trim()
+  // The registration export numbers its questions ("Q12. …") and ships each
+  // title as "<Hindi> · <English>". The number moves whenever a question is
+  // added, and the Hindi half is the same sentence, so the key is the English half.
+  h = h.replace(/^q\d+\.\s*/i, '')
+  const bilingual = h.lastIndexOf(' · ')
+  if (bilingual !== -1) h = h.slice(bilingual + 3)
+  return h
+    .replace(/[*?？।:.]+$/u, '')
     .trim()
     .toLowerCase()
 }
@@ -150,6 +167,57 @@ const RAW_FIELD_MAP: Record<string, string> = {
   'क्या ग्राहक बार-बार लौटते हैं': 'retention_signal',
   'आप हफ़्ते में कितने घंटे दे पाते हैं': 'time_commitment',
   'आप कौन सी भाषा पसंद करते हैं': 'language',
+
+  // --- ShuruKar registration export (2026-10). Keys are the English half of
+  // each "Q<n>. <Hindi> · <English>" header. The form branches on Q12: idea
+  // founders answer Q13-18, built Q19-27, in-market Q28-36, so several
+  // columns land on the same field and only one of them is ever filled. ---
+  'registration id': 'external_id',
+  phone: 'contact_phone',
+  email: 'contact_email',
+  status: 'form_status',
+  'started at': 'started_at',
+  name: 'name',
+  'which state are you from': 'state',
+  'what is your pin code': 'pin_code',
+  'which of these describes you best right now': 'persona',
+  'are you giving this idea your full time or part of your time': 'commitment_type',
+  'are you working on this idea alone or with a team': 'team_size',
+  'have you registered a business yet? (udyam, gst, a licence or a company)': 'registration_status',
+  'what is your idea / business': 'problem_solution',
+  'what inspired you to solve this problem': 'inspiration',
+  'what experience do you have in this line of work? have you worked in this area before': 'founder_proximity',
+  'in 10 years, how big do you want this to become': 'growth_ambition',
+  'which of these best describes where you are': 'declared_stage',
+  'how much time can you give shurukar each week': 'time_commitment',
+  'if you have design document or a presentation of your product/ solution, please share it': 'pitch_document',
+  // idea branch (Q13-18)
+  'what would help you build this? pick the most important': 'constraint',
+  'what solution are people using today instead? how would yours be different': 'alternatives_today',
+  'have you spoken to people who might use this? how many': 'customers_spoken_to',
+  'what have you done so far to check that this idea works': 'validation_done',
+  'would those people pay for it': 'willingness_to_pay',
+  // A need, not a channel ("a working prototype", "money"). Kept apart from
+  // route_to_market so an idea founder is not read as having named a route.
+  'what would help bring this idea to market? pick the most important': 'market_need',
+  // built branch (Q19-27)
+  'what would help bring this to market? pick the most important': 'constraint',
+  'send a photo or video of it — the shop, the machine, the product, the screen. you can send more than one': 'media_links',
+  'how long have you been at this work': 'time_in_line',
+  'what do people use today instead? how is yours different': 'alternatives_today',
+  'how many people have used it so far': 'users_count',
+  'would they pay for it': 'willingness_to_pay',
+  'what have you done to check if your solution is actually helping or will help your customers': 'validation_done',
+  // The options are channels (online, dealers, a big buyer), so this is the
+  // closest the form comes to asking how they will reach the market.
+  'what would help you reach your customers quickly? pick the most important': 'access_route',
+  // in-market branch (Q28-36)
+  'what would help you grow this? pick the most important': 'constraint',
+  'send a photo or video of it. you can send more than one': 'media_links',
+  'how many customers have paid you': 'paying_customers',
+  'roughly how much does this earn in a month': 'monthly_income',
+  'who are your competitors in the market': 'alternatives_today',
+  'what would help you reach more customers quickly? pick the most important': 'access_route',
 }
 
 /** Normalised header -> fieldId. Built once at module load. */
@@ -183,7 +251,12 @@ export function normalizeRecord(record: Record<string, string>): Record<string, 
   for (const [header, value] of Object.entries(record)) {
     const fieldId = lookupField(header)
     if (!fieldId || META_COLUMNS.has(fieldId)) continue
-    out[fieldId] = value
+    // Branching forms put one field in several columns, only one of them
+    // answered. An empty branch column must never erase the answered one.
+    const v = value == null ? '' : String(value)
+    const existing = out[fieldId]
+    if (existing === undefined || existing.trim() === '') out[fieldId] = v
+    else if (v.trim() !== '' && v.trim() !== existing.trim()) out[fieldId] = `${existing} / ${v}`
   }
   return out
 }

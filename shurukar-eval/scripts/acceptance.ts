@@ -14,13 +14,19 @@ import { execFileSync } from 'child_process'
 const scratch = fs.mkdtempSync(path.join(os.tmpdir(), 'shurukar-acceptance-'))
 process.env.DATABASE_URL = `file:${path.join(scratch, 'acceptance.db')}`
 
-// execFileSync does not go through a shell, and on Windows the executable is
-// `npx.cmd` — plain 'npx' is ENOENT there. Naming the right binary is better
-// than `shell: true`, which concatenates arguments unescaped and trips Node's
-// DEP0190 security warning.
+// Prisma's CLI is run as a plain node script — the same way the container
+// entrypoint does it. `npx` is `npx.cmd` on Windows, and Node 20.12+ refuses to
+// spawn a .cmd without `shell: true` (EINVAL), which concatenates arguments
+// unescaped. Going through node avoids both.
 execFileSync(
-  process.platform === 'win32' ? 'npx.cmd' : 'npx',
-  ['prisma', 'db', 'push', '--skip-generate', '--accept-data-loss'],
+  process.execPath,
+  [
+    path.join(process.cwd(), 'node_modules', 'prisma', 'build', 'index.js'),
+    'db',
+    'push',
+    '--skip-generate',
+    '--accept-data-loss',
+  ],
   { stdio: 'pipe', env: process.env },
 )
 
